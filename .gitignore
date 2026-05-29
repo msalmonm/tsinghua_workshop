@@ -1,0 +1,42 @@
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.Python
+venv/
+env/
+ENV/
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Testing
+coverage/
+.nyc_output/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
+
+# Python
+*.egg-info/
+.pytest_cache/
