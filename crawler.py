@@ -14,6 +14,9 @@ import requests
 # Load environment variables
 load_dotenv()
 
+# Set OpenMP environment variable to avoid duplicate library warning
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
 # Validate environment variables
 ELASTICSEARCH_URL = os.getenv('ELASTICSEARCH_URL')
 ELASTICSEARCH_API_KEY = os.getenv('ELASTICSEARCH_API_KEY')
