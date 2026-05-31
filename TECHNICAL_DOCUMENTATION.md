@@ -1528,7 +1528,7 @@ ELASTICSEARCH_API_KEY=RDA0TWRwNEI5QTllTFFMWU5zQUc6MHN0Z241NHJBcVlud1Z2dWljU1ZZQQ
 
 # OpenAI API Key
 # Starts with sk-proj- or sk-
-OPENAI_API_KEY=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
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ### D.2 Model Configuration
