@@ -1,6 +1,6 @@
 # RAG Health & Fitness POC
 
-Simple proof-of-concept demonstrating Retrieval-Augmented Generation (RAG) for fitness recommendations.
+Simple proof-of-concept demonstrating Retrieval-Augmented Generation (RAG) for fitness recommendations using OpenAI API.
 
 ## Setup
 
@@ -21,10 +21,10 @@ KMP_DUPLICATE_LIB_OK=TRUE
 ELASTICSEARCH_URL=https://your-deployment-id.region.gcp.cloud.es.io:443
 ELASTICSEARCH_API_KEY=your_elasticsearch_api_key_here
 
-# Hugging Face API Configuration (OPTIONAL)
-# Get your free API key at: https://huggingface.co/settings/tokens
-# The system works without this key but with rate limits
-HUGGINGFACE_API_KEY=your_huggingface_token_here
+# OpenAI API Configuration (RECOMMENDED)
+# Get your API key at: https://platform.openai.com/api-keys
+# New accounts get $5 free credit (~20,000 queries)
+OPENAI_API_KEY=sk-your-openai-key-here
 ```
 
 ## Usage
@@ -35,10 +35,10 @@ python crawler.py
 ```
 
 This will:
-- Fetch exercises from Wger API
-- Create sample recipes
-- Generate embeddings
-- Index everything into Elasticsearch
+- Fetch 120 exercises from GitHub's free-exercise-db
+- Fetch ~140 recipes from TheMealDB API
+- Generate 384-dimensional embeddings
+- Index everything into Elasticsearch (~30 seconds)
 
 ### Step 2: Query the system
 ```bash
@@ -50,39 +50,87 @@ Examples:
 python query.py "I want to lose weight"
 python query.py "I need a high protein meal plan"
 python query.py "What exercises for abs?"
+python query.py "I'm a beginner looking to get stronger"
 ```
 
 ## How it works
 
-1. **crawler.py** - Fetches data, generates 384-dim embeddings (sentence-transformers), indexes to Elasticsearch
-2. **query.py** - Takes your prompt, searches Elasticsearch with k-NN, calls Hugging Face Inference API (Mistral-7B) with retrieved context
+```
+User Query → Embedding → Elasticsearch (k-NN) → Top 3 Exercises + Top 3 Recipes
+                                                           ↓
+                                                    OpenAI API
+                                                           ↓
+                                              Personalized Response
+```
+
+1. **crawler.py** - Fetches real fitness data, generates embeddings, indexes to Elasticsearch
+2. **query.py** - Converts query to embedding, searches Elasticsearch, calls OpenAI with context
 
 ## Stack
 
-- **Elasticsearch Cloud** - Vector store
-- **sentence-transformers** - Embeddings (all-MiniLM-L6-v2)
-- **Hugging Face Inference API** - LLM (Mistral-7B-Instruct-v0.2) - FREE!
+- **Elasticsearch Cloud** - Vector database with k-NN search
+- **sentence-transformers** - Embeddings (all-MiniLM-L6-v2, 384-dim)
+- **OpenAI API** - LLM (gpt-4o-mini or gpt-3.5-turbo)
+- **GitHub + TheMealDB** - Real exercise and recipe data
 
 ## Troubleshooting
 
 **"Error connecting to Elasticsearch"**
 - Check your `.env` file has correct ELASTICSEARCH_URL and ELASTICSEARCH_API_KEY
+- Test connection: `curl -H "Authorization: ApiKey $ELASTICSEARCH_API_KEY" $ELASTICSEARCH_URL`
 
-**"Model is loading"**
-- Hugging Face models may take 20 seconds to load on first request (cold start)
-- The script will automatically wait and retry
+**"Invalid API key" (OpenAI)**
+- Verify your key at: https://platform.openai.com/api-keys
+- Ensure it starts with `sk-`
+- Check for extra spaces in `.env` file
+
+**"Rate limit exceeded" (OpenAI)**
+- Wait 60 seconds and retry
+- Check usage at: https://platform.openai.com/usage
+- System automatically falls back to template response
 
 **"No results found"**
 - Run `python crawler.py` first to index data
+- Verify indices exist in Elasticsearch
 
-**Rate limits**
-- Without API key: ~1000 requests/day
-- With free API key: Higher limits
-- Get your free key at: https://huggingface.co/settings/tokens
+**Network issues**
+- OpenAI has better connectivity than Hugging Face
+- System includes fallback response generator
+- Check firewall/proxy settings if needed
 
 ## Features
 
-✅ **Semantic Vector Search** - Uses 384-dimensional embeddings for intelligent content retrieval  
-✅ **Personalized Responses** - Context-aware recommendations based on retrieved exercises and recipes  
-✅ **Robust Fallback** - Works offline with intelligent local response generation  
-✅ **Free & Open Source** - No paid API keys required
+✅ **Semantic Vector Search** - 384-dimensional embeddings for intelligent retrieval  
+✅ **High-Quality Responses** - OpenAI GPT-4o-mini for natural, helpful advice  
+✅ **Real Data** - 120 exercises + 140 recipes from public APIs  
+✅ **Fast** - 2-5 second response time  
+✅ **Robust Fallback** - Works without API key using template responses  
+✅ **Cost Effective** - $0.00024 per query, $5 free credit for new accounts
+
+## Documentation
+
+- **[CRAWLER_DOCUMENTATION.md](CRAWLER_DOCUMENTATION.md)** - Complete crawler architecture and data sources
+- **[OPENAI_MIGRATION.md](OPENAI_MIGRATION.md)** - OpenAI API integration guide and design decisions
+- **[SETUP.md](SETUP.md)** - Detailed setup instructions
+
+## Alternative: Local LLM
+
+If you prefer to run everything locally without API keys:
+
+```bash
+# Install Ollama: https://ollama.ai/download
+ollama run llama3.2:3b
+
+# Use local version
+python query_local.py "I want to build muscle"
+```
+
+## Cost Analysis
+
+**OpenAI (gpt-4o-mini):**
+- Input: $0.15 per 1M tokens
+- Output: $0.60 per 1M tokens
+- **~$0.00024 per query**
+- **$5 free credit = ~20,000 queries**
+
+Perfect for development, testing, and small-scale production.
