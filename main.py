@@ -4,7 +4,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from elasticsearch import Elasticsearch
-from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
 load_dotenv()
@@ -35,14 +34,15 @@ class QueryRequest(BaseModel):
     query: str
     user_profile: UserProfile
 
-# Variable global para guardar el modelo sin bloquear el inicio
 modelo_texto = None
 
 def cargar_modelo():
-    """Carga el modelo solo cuando se necesita por primera vez"""
+    """Carga el modelo y la librería solo cuando se recibe la primera petición"""
     global modelo_texto
     if modelo_texto is None:
         print("Descargando y cargando el modelo de texto...")
+        # El import debe ir aquí adentro para que el servidor inicie al instante
+        from sentence_transformers import SentenceTransformer
         modelo_texto = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     return modelo_texto
 
@@ -74,7 +74,6 @@ def health_check():
 @app.post("/api/recommend")
 def get_recommendation(request: QueryRequest):
     try:
-        # Cargar el modelo aquí evita que el servidor falle al iniciar
         modelo_actual = cargar_modelo()
         query_vector = modelo_actual.encode(request.query).tolist()
     except Exception as e:
