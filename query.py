@@ -103,14 +103,32 @@ Provide a practical, actionable response that addresses the user's goal."""
 
 def call_huggingface(prompt):
     """Call Hugging Face Inference API and return response"""
-    print("Generating response with Hugging Face (Mistral-7B)...")
+    print("Generating response with Hugging Face...")
     
-    # Usar modelo gratuito de Hugging Face
-    API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+    # Lista de modelos alternativos para probar
+    models_to_try = [
+        ("meta-llama/Llama-3.2-3B-Instruct", "Llama 3.2 3B"),
+        ("microsoft/Phi-3-mini-4k-instruct", "Phi-3 Mini"),
+        ("google/flan-t5-large", "FLAN-T5 Large"),
+        ("mistralai/Mistral-7B-Instruct-v0.2", "Mistral-7B")
+    ]
     
     headers = {}
     if HUGGINGFACE_API_KEY:
         headers["Authorization"] = f"Bearer {HUGGINGFACE_API_KEY}"
+        print(f"Using API key: {HUGGINGFACE_API_KEY[:10]}...")
+    else:
+        print("Warning: No API key found. Using unauthenticated requests (rate limited)")
+    
+    # Configurar proxy si está definido en variables de entorno
+    proxies = {}
+    if os.getenv('HTTP_PROXY'):
+        proxies['http'] = os.getenv('HTTP_PROXY')
+    if os.getenv('HTTPS_PROXY'):
+        proxies['https'] = os.getenv('HTTPS_PROXY')
+    
+    if proxies:
+        print(f"Using proxy configuration: {proxies}")
     
     payload = {
         "inputs": prompt,
@@ -122,32 +140,57 @@ def call_huggingface(prompt):
         }
     }
     
-    try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
-        
-        if response.status_code == 503:
-            print("Model is loading, waiting 20 seconds...")
-            import time
-            time.sleep(20)
-            response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
-        
-        response.raise_for_status()
-        result = response.json()
-        
-        if isinstance(result, list) and len(result) > 0:
-            return result[0].get('generated_text', '').replace(prompt, '').strip()
-        elif isinstance(result, dict):
-            return result.get('generated_text', '').replace(prompt, '').strip()
-        else:
-            return str(result)
+    # Intentar con cada modelo
+    for model_id, model_name in models_to_try:
+        try:
+            API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+            print(f"\nTrying {model_name}...")
+            print(f"API URL: {API_URL}")
             
-    except requests.exceptions.ConnectionError:
-        print("No internet connection. Using local response generation...")
-        return generate_local_response_with_context(prompt)
-    except Exception as e:
-        print(f"Error calling Hugging Face API: {e}")
-        print("Falling back to local response generation...")
-        return generate_local_response_with_context(prompt)
+            response = requests.post(API_URL, headers=headers, json=payload, timeout=60, proxies=proxies if proxies else None)
+            # Intentar primero con verificación SSL normal
+            try:
+                response = requests.post(API_URL, headers=headers, json=payload, timeout=60, proxies=proxies if proxies else None)
+            except requests.exceptions.SSLError:
+                print(f"SSL error, retrying without verification...")
+                response = requests.post(API_URL, headers=headers, json=payload, timeout=60, proxies=proxies if proxies else None, verify=False)
+            
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code == 503:
+                print(f"{model_name} is loading, waiting 20 seconds...")
+                import time
+                time.sleep(20)
+                response = requests.post(API_URL, headers=headers, json=payload, timeout=60, proxies=proxies if proxies else None)
+                print(f"Retry response status code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"✓ API call successful with {model_name}!")
+                
+                if isinstance(result, list) and len(result) > 0:
+                    return result[0].get('generated_text', '').replace(prompt, '').strip()
+                elif isinstance(result, dict):
+                    return result.get('generated_text', '').replace(prompt, '').strip()
+                else:
+                    return str(result)
+            else:
+                print(f"✗ {model_name} returned error {response.status_code}: {response.text[:200]}")
+                continue  # Try next model
+                
+        except requests.exceptions.ConnectionError as e:
+            print(f"✗ Connection error with {model_name}: {str(e)[:100]}")
+            continue  # Try next model
+        except requests.exceptions.Timeout as e:
+            print(f"✗ Timeout with {model_name}: {str(e)[:100]}")
+            continue  # Try next model
+        except Exception as e:
+            print(f"✗ Error with {model_name}: {type(e).__name__}: {str(e)[:100]}")
+            continue  # Try next model
+    
+    # Si todos los modelos fallaron
+    print("\n✗ All Hugging Face models failed. Using local response generation...")
+    return generate_local_response_with_context(prompt)
 
 def generate_local_response_with_context(prompt):
     """Generate a response using the context from the prompt"""
