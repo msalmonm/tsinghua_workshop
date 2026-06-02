@@ -1,228 +1,323 @@
 #!/usr/bin/env python3
 """
-RAG Health & Fitness POC - Data Crawler
-Fetches exercises (Static JSON Dump) and recipes (TheMealDB API), 
-generates embeddings, and bulk-indexes into Elasticsearch.
+RAG Health & Fitness POC - Bulletproof Data Crawler
+Fetches +800 exercises (GitHub Dump + RapidAPI) and Recipes via FatSecret OAuth 2.0.
+Includes an automatic Data Fallback system if APIs are unreachable.
 """
 
 import os
 import sys
 import re
+import time
 import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch, helpers
 from sentence_transformers import SentenceTransformer
 
-# Load environment variables
 load_dotenv()
-
-# Set OpenMP environment variable to avoid duplicate library warning
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
 ELASTICSEARCH_URL = os.getenv('ELASTICSEARCH_URL')
 ELASTICSEARCH_API_KEY = os.getenv('ELASTICSEARCH_API_KEY')
+RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY') 
 
-if not ELASTICSEARCH_URL or not ELASTICSEARCH_API_KEY:
-    print("Error: ELASTICSEARCH_URL and ELASTICSEARCH_API_KEY must be set in .env file")
+# Credenciales de FatSecret proporcionadas
+FATSECRET_CLIENT_ID = os.getenv('FATSECRET_CLIENT_ID')
+FATSECRET_CLIENT_SECRET = os.getenv('FATSECRET_CLIENT_SECRET')
+
+missing_vars = []
+if not ELASTICSEARCH_URL: missing_vars.append("ELASTICSEARCH_URL")
+if not ELASTICSEARCH_API_KEY: missing_vars.append("ELASTICSEARCH_API_KEY")
+
+if missing_vars:
+    print("\nERROR CRÍTICO DE CONFIGURACIÓN. Faltan variables base en el .env")
     sys.exit(1)
 
-# Initialize embedding model
 print("Loading embedding model...")
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 print("Model loaded successfully")
 
 def generate_embedding(text):
-    """Generate 384-dimensional embedding for text"""
     try:
         return model.encode(text).tolist()
-    except Exception as e:
-        print(f"Error generating embedding: {e}")
+    except Exception:
         return None
 
-def fetch_exercises():
-    """Fetch exercise data from a highly reliable public GitHub JSON dataset"""
-    print("\nFetching exercises from public Open Source database...")
+def fetch_rapidapi_exercises():
+    """Trae ejercicios desde ExerciseDB"""
+    print("\n[1/3] Buscando ejercicios en ExerciseDB...")
     exercises = []
-    
-    try:
-        # Usamos un dump JSON estático y público. Cero fallos, cero bloqueos.
-        url = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
+    if not RAPIDAPI_KEY:
+        print("  -> Saltando RapidAPI (No hay llave en .env)")
+        return exercises
         
+    url = "https://exercisedb.p.rapidapi.com/exercises"
+    headers = {"X-RapidAPI-Key": RAPIDAPI_KEY, "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"}
+    try:
+        response = requests.get(url, headers=headers, params={"limit": "2000"}, timeout=15)
+        if response.status_code == 200:
+            for item in response.json():
+                equipment = item.get('equipment', 'body weight')
+                met = 6.0 if equipment != "body weight" else 4.0
+                exercises.append({
+                    'id': f"ex_rapid_{item.get('id')}",
+                    'name': item.get('name'),
+                    'target_muscle': item.get('target'),
+                    'equipment': equipment,
+                    'estimated_met': met,
+                    'search_context': f"{item.get('name')}. Target: {item.get('target')}. Equip: {equipment}. Instructions: {' '.join(item.get('instructions', []))}"[:1000]
+                })
+        print(f"  ✓ Fetched {len(exercises)} exercises from RapidAPI")
+        return exercises
+    except Exception as e:
+        print(f"  Aviso RapidAPI: {e}")
+        return []
+
+def fetch_github_exercises():
+    """Trae +800 ejercicios del Data Dump estático de GitHub"""
+    print("\n[2/3] Extrayendo base masiva de ejercicios desde GitHub Dump...")
+    exercises = []
+    url = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
+    try:
         response = requests.get(url, timeout=15)
         response.raise_for_status()
         data = response.json()
         
-        # El dataset tiene más de 800 ejercicios. 
-        # Tomaremos los primeros 120 para mantener el MVP rápido de indexar.
-        for i, item in enumerate(data[:120]):
-            name = item.get('name', 'Unknown Exercise')
-            category = item.get('category', 'general')
-            level = item.get('level', 'beginner')
+        for i, item in enumerate(data):
+            name = item.get('name', '')
             equipment = item.get('equipment', 'body only')
+            muscles_list = item.get('primaryMuscles', ['various'])
+            target = muscles_list[0] if muscles_list else 'various'
+            instructions = " ".join(item.get('instructions', []))
             
-            # Los músculos vienen en una lista
-            muscles_list = item.get('primaryMuscles', [])
-            muscles = ", ".join(muscles_list) if muscles_list else "various muscles"
+            met = 6.0 if equipment not in ["body only", "none"] else 4.0
             
-            # Las instrucciones vienen en una lista de pasos
-            instructions_list = item.get('instructions', [])
-            description = " ".join(instructions_list) if instructions_list else ""
+            search_context = f"{name}. Target muscle: {target}. Equipment: {equipment}. Instructions: {instructions}"
             
-            if name and description:
-                # Un contexto semántico extremadamente rico para el motor RAG
-                search_context = f"{name}. Level: {level}. Equipment: {equipment}. Muscle Group: {muscles}. Category: {category}. Description: {description}"
-                
-                exercises.append({
-                    'id': f"ex_gh_{i}",
-                    'name': name,
-                    'category': category.capitalize(),
-                    'description': description[:800], 
-                    'search_context': search_context[:1000]
-                })
-        
-        print(f"Fetched {len(exercises)} exercises from public database")
+            exercises.append({
+                'id': f"ex_gh_{i}",
+                'name': name,
+                'target_muscle': target,
+                'equipment': equipment,
+                'estimated_met': met,
+                'search_context': search_context[:1000]
+            })
+            
+        print(f"  ✓ Fetched {len(exercises)} exercises from GitHub Dump")
         return exercises
-        
     except Exception as e:
-        print(f"Error fetching exercises: {e}")
+        print(f"  Error fetching GitHub Dump: {e}")
         return []
 
-def fetch_recipes():
-    """Fetch recipe data dynamically using TheMealDB API"""
-    print("\nCrawling recipes from TheMealDB...")
+def get_fallback_recipes():
+    """Recetas locales premium en caso de fallo crítico de API"""
+    print("  -> Inyectando base de datos local de respaldo para recetas...")
+    return [
+        {
+            'id': 'rec_fallback_1', 'name': 'Ensalada de Pollo a la Parrilla Alto en Proteína', 'ready_in_minutes': 20, 'diets': ['gluten free', 'high protein', 'low carb'],
+            'macros': {'calories': 350, 'protein_g': 45.0, 'carbs_g': 10.0, 'fats_g': 12.0},
+            'search_context': 'Ensalada de Pollo a la Parrilla Alto en Proteína. Diets: gluten free, high protein, low carb. Ready in 20 mins. Ingredients: pechuga de pollo, lechuga romana, aceite de oliva, tomates cherry. Instructions: Asar la pechuga, cortar en tiras y mezclar con los vegetales.'
+        },
+        {
+            'id': 'rec_fallback_2', 'name': 'Avena Nocturna con Proteína y Chía', 'ready_in_minutes': 5, 'diets': ['vegetarian', 'high protein'],
+            'macros': {'calories': 420, 'protein_g': 25.0, 'carbs_g': 45.0, 'fats_g': 10.0},
+            'search_context': 'Avena Nocturna con Proteína y Chía. Diets: vegetarian, high protein. Ready in 5 mins. Ingredients: avena, leche de almendras, scoop de proteína whey, semillas de chía. Instructions: Mezclar todo en un frasco y dejar reposar en el refrigerador toda la noche.'
+        },
+        {
+            'id': 'rec_fallback_3', 'name': 'Salmón Glaseado con Quinoa', 'ready_in_minutes': 30, 'diets': ['pescatarian', 'gluten free'],
+            'macros': {'calories': 520, 'protein_g': 38.0, 'carbs_g': 35.0, 'fats_g': 22.0},
+            'search_context': 'Salmón Glaseado con Quinoa. Diets: pescatarian, gluten free. Ready in 30 mins. Ingredients: filete de salmón, quinoa, salsa de soja baja en sodio, brócoli. Instructions: Hornear el salmón a 200C por 15 mins. Servir sobre quinoa cocida con brócoli al vapor.'
+        }
+    ]
+
+def fetch_fatsecret_recipes():
+    """Busca recetas y desglosa sus macros usando FatSecret OAuth 2.0"""
+    print("\n[3/3] Buscando recetas masivas en FatSecret...")
     recipes = []
     
-    letters_to_fetch = ['a', 'b', 'c', 's'] 
+    # 1. Obtener Token OAuth 2.0
+    try:
+        print("  -> Autenticando con FatSecret (OAuth 2.0)...")
+        token_url = "https://oauth.fatsecret.com/connect/token"
+        auth_req = requests.post(
+            token_url, 
+            data={"grant_type": "client_credentials", "scope": "basic"}, 
+            auth=(FATSECRET_CLIENT_ID, FATSECRET_CLIENT_SECRET),
+            timeout=10
+        )
+        auth_req.raise_for_status()
+        access_token = auth_req.json()['access_token']
+    except Exception as e:
+        print(f"  ⚠️ Falló la autenticación con FatSecret: {e}")
+        return get_fallback_recipes()
+
+    # 2. Configurar cliente y realizar extracciones
+    api_url = "https://platform.fatsecret.com/rest/server.api"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    queries = ['chicken', 'beef', 'pork', 'fish', 'salad', 'vegetarian', 'vegan', 'keto', 'pasta', 'soup']
     
     try:
-        for letter in letters_to_fetch:
-            url = f"https://www.themealdb.com/api/json/v1/1/search.php?f={letter}"
-            response = requests.get(url, timeout=10)
-            data = response.json()
+        for q in queries:
+            print(f"  -> Consultando categoría: {q}...")
+            # Búsqueda general
+            search_params = {
+                "method": "recipes.search",
+                "format": "json",
+                "search_expression": q,
+                "max_results": 10 # 10 recetas profundas por lote
+            }
+            res = requests.post(api_url, headers=headers, data=search_params, timeout=15)
+            if res.status_code != 200: continue
             
-            meals = data.get('meals')
-            if not meals:
-                continue
+            recipe_list = res.json().get('recipes', {}).get('recipe', [])
+            if isinstance(recipe_list, dict): recipe_list = [recipe_list] # API JSON format protection
+            
+            for r_stub in recipe_list:
+                recipe_id = r_stub.get('recipe_id')
                 
-            for meal in meals:
-                name = meal.get('strMeal', '')
-                category = meal.get('strCategory', '')
-                instructions = meal.get('strInstructions', '').replace('\r\n', ' ')
+                # Extracción Profunda por cada Receta
+                det_params = {
+                    "method": "recipe.get",
+                    "format": "json",
+                    "recipe_id": recipe_id
+                }
+                det_res = requests.post(api_url, headers=headers, data=det_params, timeout=10)
+                if det_res.status_code != 200: continue
                 
-                ingredients = []
-                for i in range(1, 21):
-                    ingredient = meal.get(f'strIngredient{i}')
-                    measure = meal.get(f'strMeasure{i}')
-                    if ingredient and ingredient.strip():
-                        ingredients.append(f"{measure} {ingredient}".strip())
+                r_data = det_res.json().get('recipe', {})
+                if not r_data: continue
                 
-                ingredients_str = ", ".join(ingredients)
-                search_context = f"{name}. Category: {category}. Ingredients: {ingredients_str}. Instructions: {instructions}"
+                # Macros Parsing
+                serving = r_data.get('serving_sizes', {}).get('serving', {})
+                if isinstance(serving, list): serving = serving[0]
+                
+                cal = float(serving.get('calories', 0))
+                pro = float(serving.get('protein', 0))
+                carb = float(serving.get('carbohydrate', 0))
+                fat = float(serving.get('fat', 0))
+                
+                # Ingredients Parsing
+                ing_data = r_data.get('ingredients', {}).get('ingredient', [])
+                if isinstance(ing_data, dict): ing_data = [ing_data]
+                ing_str = ", ".join([ing.get('ingredient_description', '') for ing in ing_data])
+                
+                # Instructions Parsing
+                dir_data = r_data.get('directions', {}).get('direction', [])
+                if isinstance(dir_data, dict): dir_data = [dir_data]
+                inst_str = " ".join([d.get('direction_description', '') for d in dir_data])
+                
+                # Time Parsing
+                prep_time = int(r_data.get('preparation_time_min', 0))
+                cook_time = int(r_data.get('cooking_time_min', 0))
+                ready_in = prep_time + cook_time if (prep_time or cook_time) else 30
+                
+                # Tagging logic (FatSecret doesn't label diets cleanly)
+                diets = [q] if q in ['vegetarian', 'vegan', 'keto'] else []
+                name = r_data.get('recipe_name', 'Receta')
+                
+                search_context = f"{name}. Diets: {', '.join(diets)}. Ready in {ready_in} mins. Ingredients: {ing_str}. Instructions: {inst_str}"
                 
                 recipes.append({
-                    'id': f"rec_{meal.get('idMeal')}",
+                    'id': f"rec_fs_{recipe_id}", 
                     'name': name,
-                    'category': category,
-                    'ingredients': ingredients_str,
-                    'instructions': instructions[:800],
+                    'ready_in_minutes': ready_in,
+                    'diets': diets,                       
+                    'macros': {'calories': int(cal), 'protein_g': round(pro, 1), 'carbs_g': round(carb, 1), 'fats_g': round(fat, 1)},
                     'search_context': search_context[:1000]
                 })
+            
+            # Pausa para respetar el Rate Limit de FatSecret
+            time.sleep(0.5) 
                 
-        print(f"Fetched {len(recipes)} recipes from API")
+        print(f"  ✓ Éxito: {len(recipes)} recetas altamente detalladas extraídas de FatSecret.")
+        if len(recipes) == 0: return get_fallback_recipes()
         return recipes
-    except Exception as e:
-        print(f"Error fetching recipes: {e}")
-        return []
 
-def create_indices(es_client):
-    """Create Elasticsearch indices with proper mappings"""
-    print("\nCreating Elasticsearch indices...")
+    except Exception as e:
+        print(f"  Error Fatal en FatSecret: {e}")
+        return get_fallback_recipes()
+
+def safe_create_index(es_client, index_name, mapping, has_new_data):
+    if not has_new_data:
+        print(f"Saltando limpieza del índice '{index_name}' para no borrar datos previos (0 extraídos).")
+        return
+
+    if es_client.indices.exists(index=index_name):
+        print(f"Borrando índice '{index_name}' para actualizar...")
+        es_client.indices.delete(index=index_name)
     
-    mapping = {
+    es_client.indices.create(index=index_name, body=mapping)
+    print(f"Índice '{index_name}' recreado con esquemas numéricos.")
+
+def bulk_index(es_client, index_name, documents):
+    if not documents:
+        return
+    print(f"Generando vectores e indexando {len(documents)} documentos en '{index_name}'...")
+    actions = []
+    for doc in documents:
+        emb = generate_embedding(doc.get('search_context', ''))
+        if emb:
+            doc['embedding'] = emb
+            actions.append({"_index": index_name, "_id": doc['id'], "_source": doc})
+    
+    if actions:
+        helpers.bulk(es_client, actions)
+        print(f"✓ ¡Éxito! Base de datos de {index_name} poblada.")
+
+def main():
+    print("=" * 60)
+    print("RAG Health & Fitness POC - FatSecret Crawler Edition")
+    print("=" * 60)
+    
+    es_client = Elasticsearch(ELASTICSEARCH_URL, api_key=ELASTICSEARCH_API_KEY)
+    
+    rapid_ex = fetch_rapidapi_exercises()
+    github_ex = fetch_github_exercises()
+    all_exercises = rapid_ex + github_ex
+    
+    recipes = fetch_fatsecret_recipes()
+    
+    recipe_mapping = {
         "mappings": {
             "properties": {
                 "name": {"type": "text"},
-                "category": {"type": "keyword"},
                 "search_context": {"type": "text"},
-                "embedding": {
-                    "type": "dense_vector",
-                    "dims": 384,
-                    "index": True,
-                    "similarity": "cosine"
-                }
+                "ready_in_minutes": {"type": "integer"}, 
+                "diets": {"type": "keyword"},            
+                "macros": {
+                    "properties": {
+                        "calories": {"type": "integer"}, "protein_g": {"type": "float"},
+                        "carbs_g": {"type": "float"}, "fats_g": {"type": "float"}
+                    }
+                },
+                "embedding": {"type": "dense_vector", "dims": 384, "index": True, "similarity": "cosine"}
             }
         }
     }
     
-    for index_name in ["exercises", "recipes"]:
-        try:
-            if es_client.indices.exists(index=index_name):
-                print(f"{index_name.capitalize()} index already exists, deleting...")
-                es_client.indices.delete(index=index_name)
-            
-            es_client.indices.create(index=index_name, body=mapping)
-            print(f"Created {index_name} index")
-        except Exception as e:
-            print(f"Error creating {index_name} index: {e}")
-            sys.exit(1)
-
-def bulk_index(es_client, index_name, documents):
-    """Bulk index documents efficiently"""
-    if not documents:
-        print(f"No documents to index for {index_name}.")
-        return
-
-    print(f"\nGenerating embeddings and bulk indexing {len(documents)} into {index_name}...")
-    
-    actions = []
-    for doc in documents:
-        embedding = generate_embedding(doc.get('search_context', ''))
-        
-        if embedding:
-            doc['embedding'] = embedding
-            action = {
-                "_index": index_name,
-                "_id": doc['id'],
-                "_source": doc
+    exercise_mapping = {
+        "mappings": {
+            "properties": {
+                "name": {"type": "text"},
+                "target_muscle": {"type": "keyword"},
+                "equipment": {"type": "keyword"},
+                "estimated_met": {"type": "float"},
+                "search_context": {"type": "text"},
+                "embedding": {"type": "dense_vector", "dims": 384, "index": True, "similarity": "cosine"}
             }
-            actions.append(action)
-    
-    if actions:
-        try:
-            success, _ = helpers.bulk(es_client, actions)
-            print(f"Successfully indexed {success} documents into {index_name}")
-        except Exception as e:
-            print(f"Error during bulk indexing: {e}")
+        }
+    }
 
-def main():
-    print("=" * 60)
-    print("RAG Health & Fitness POC - Data Crawler")
-    print("=" * 60)
+    print("\n--- Verificando estado de la Base de Datos ---")
+    safe_create_index(es_client, "exercises", exercise_mapping, has_new_data=(len(all_exercises) > 0))
+    safe_create_index(es_client, "recipes", recipe_mapping, has_new_data=(len(recipes) > 0))
     
-    try:
-        es_client = Elasticsearch(
-            ELASTICSEARCH_URL,
-            api_key=ELASTICSEARCH_API_KEY
-        )
-        es_client.info()
-        print("✓ Connected to Elasticsearch")
-    except Exception as e:
-        print(f"Error connecting to Elasticsearch: {e}")
-        sys.exit(1)
-    
-    # 1. Fetch real data
-    exercises = fetch_exercises()
-    recipes = fetch_recipes()
-    
-    # 2. Reset indices
-    create_indices(es_client)
-    
-    # 3. Vectorize and bulk load
-    bulk_index(es_client, "exercises", exercises)
+    print("\n--- Iniciando Carga Vectorial ---")
+    bulk_index(es_client, "exercises", all_exercises)
     bulk_index(es_client, "recipes", recipes)
     
     print("\n" + "=" * 60)
-    print("✓ Crawler completed successfully!")
+    print("✓ Crawler finalizado con éxito total.")
     print("=" * 60)
 
 if __name__ == "__main__":
