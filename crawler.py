@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-RAG Health & Fitness POC - Bulletproof Data Crawler
-Fetches +800 exercises (GitHub Dump + RapidAPI) and Recipes via FatSecret OAuth 2.0.
-Includes an automatic Data Fallback system if APIs are unreachable.
+RAG Health & Fitness POC - Advanced Data Crawler
+Fetches massive exercises (GitHub Dump + RapidAPI) and recipes (FatSecret).
+Includes Data Protection: Will not overwrite index if API limit is reached.
+Search context dynamically incorporates all fields as a JSON string.
 """
 
 import os
 import sys
 import re
 import time
+import json
 import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch, helpers
@@ -21,7 +23,7 @@ ELASTICSEARCH_URL = os.getenv('ELASTICSEARCH_URL')
 ELASTICSEARCH_API_KEY = os.getenv('ELASTICSEARCH_API_KEY')
 RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY') 
 
-# Credenciales de FatSecret proporcionadas
+# Credenciales de FatSecret
 FATSECRET_CLIENT_ID = os.getenv('FATSECRET_CLIENT_ID')
 FATSECRET_CLIENT_SECRET = os.getenv('FATSECRET_CLIENT_SECRET')
 
@@ -59,14 +61,21 @@ def fetch_rapidapi_exercises():
             for item in response.json():
                 equipment = item.get('equipment', 'body weight')
                 met = 6.0 if equipment != "body weight" else 4.0
-                exercises.append({
+                
+                # 1. Construir el documento
+                doc = {
                     'id': f"ex_rapid_{item.get('id')}",
                     'name': item.get('name'),
                     'target_muscle': item.get('target'),
                     'equipment': equipment,
                     'estimated_met': met,
-                    'search_context': f"{item.get('name')}. Target: {item.get('target')}. Equip: {equipment}. Instructions: {' '.join(item.get('instructions', []))}"[:1000]
-                })
+                    'instructions': ' '.join(item.get('instructions', []))
+                }
+                
+                # 2. Generar search_context dinámico como JSON
+                doc['search_context'] = json.dumps(doc, ensure_ascii=False)
+                exercises.append(doc)
+                
         print(f"  ✓ Fetched {len(exercises)} exercises from RapidAPI")
         return exercises
     except Exception as e:
@@ -92,16 +101,18 @@ def fetch_github_exercises():
             
             met = 6.0 if equipment not in ["body only", "none"] else 4.0
             
-            search_context = f"{name}. Target muscle: {target}. Equipment: {equipment}. Instructions: {instructions}"
-            
-            exercises.append({
+            doc = {
                 'id': f"ex_gh_{i}",
                 'name': name,
                 'target_muscle': target,
                 'equipment': equipment,
                 'estimated_met': met,
-                'search_context': search_context[:1000]
-            })
+                'instructions': instructions
+            }
+            
+            # search_context dinámico como JSON
+            doc['search_context'] = json.dumps(doc, ensure_ascii=False)
+            exercises.append(doc)
             
         print(f"  ✓ Fetched {len(exercises)} exercises from GitHub Dump")
         return exercises
@@ -112,30 +123,39 @@ def fetch_github_exercises():
 def get_fallback_recipes():
     """Recetas locales premium en caso de fallo crítico de API"""
     print("  -> Inyectando base de datos local de respaldo para recetas...")
-    return [
+    
+    fallback_data = [
         {
             'id': 'rec_fallback_1', 'name': 'Ensalada de Pollo a la Parrilla Alto en Proteína', 'ready_in_minutes': 20, 'diets': ['gluten free', 'high protein', 'low carb'],
             'macros': {'calories': 350, 'protein_g': 45.0, 'carbs_g': 10.0, 'fats_g': 12.0},
-            'search_context': 'Ensalada de Pollo a la Parrilla Alto en Proteína. Diets: gluten free, high protein, low carb. Ready in 20 mins. Ingredients: pechuga de pollo, lechuga romana, aceite de oliva, tomates cherry. Instructions: Asar la pechuga, cortar en tiras y mezclar con los vegetales.'
+            'ingredients': 'pechuga de pollo, lechuga romana, aceite de oliva, tomates cherry',
+            'instructions': 'Asar la pechuga, cortar en tiras y mezclar con los vegetales.'
         },
         {
             'id': 'rec_fallback_2', 'name': 'Avena Nocturna con Proteína y Chía', 'ready_in_minutes': 5, 'diets': ['vegetarian', 'high protein'],
             'macros': {'calories': 420, 'protein_g': 25.0, 'carbs_g': 45.0, 'fats_g': 10.0},
-            'search_context': 'Avena Nocturna con Proteína y Chía. Diets: vegetarian, high protein. Ready in 5 mins. Ingredients: avena, leche de almendras, scoop de proteína whey, semillas de chía. Instructions: Mezclar todo en un frasco y dejar reposar en el refrigerador toda la noche.'
+            'ingredients': 'avena, leche de almendras, scoop de proteína whey, semillas de chía',
+            'instructions': 'Mezclar todo en un frasco y dejar reposar en el refrigerador toda la noche.'
         },
         {
             'id': 'rec_fallback_3', 'name': 'Salmón Glaseado con Quinoa', 'ready_in_minutes': 30, 'diets': ['pescatarian', 'gluten free'],
             'macros': {'calories': 520, 'protein_g': 38.0, 'carbs_g': 35.0, 'fats_g': 22.0},
-            'search_context': 'Salmón Glaseado con Quinoa. Diets: pescatarian, gluten free. Ready in 30 mins. Ingredients: filete de salmón, quinoa, salsa de soja baja en sodio, brócoli. Instructions: Hornear el salmón a 200C por 15 mins. Servir sobre quinoa cocida con brócoli al vapor.'
+            'ingredients': 'filete de salmón, quinoa, salsa de soja baja en sodio, brócoli',
+            'instructions': 'Hornear el salmón a 200C por 15 mins. Servir sobre quinoa cocida con brócoli al vapor.'
         }
     ]
+    
+    # Agregar search_context como JSON dinámicamente
+    for doc in fallback_data:
+        doc['search_context'] = json.dumps(doc, ensure_ascii=False)
+        
+    return fallback_data
 
 def fetch_fatsecret_recipes():
     """Busca recetas y desglosa sus macros usando FatSecret OAuth 2.0"""
     print("\n[3/3] Buscando recetas masivas en FatSecret...")
     recipes = []
     
-    # 1. Obtener Token OAuth 2.0
     try:
         print("  -> Autenticando con FatSecret (OAuth 2.0)...")
         token_url = "https://oauth.fatsecret.com/connect/token"
@@ -151,7 +171,6 @@ def fetch_fatsecret_recipes():
         print(f"  ⚠️ Falló la autenticación con FatSecret: {e}")
         return get_fallback_recipes()
 
-    # 2. Configurar cliente y realizar extracciones
     api_url = "https://platform.fatsecret.com/rest/server.api"
     headers = {"Authorization": f"Bearer {access_token}"}
     queries = ['chicken', 'beef', 'pork', 'fish', 'salad', 'vegetarian', 'vegan', 'keto', 'pasta', 'soup']
@@ -159,23 +178,21 @@ def fetch_fatsecret_recipes():
     try:
         for q in queries:
             print(f"  -> Consultando categoría: {q}...")
-            # Búsqueda general
             search_params = {
                 "method": "recipes.search",
                 "format": "json",
                 "search_expression": q,
-                "max_results": 10 # 10 recetas profundas por lote
+                "max_results": 10
             }
             res = requests.post(api_url, headers=headers, data=search_params, timeout=15)
             if res.status_code != 200: continue
             
             recipe_list = res.json().get('recipes', {}).get('recipe', [])
-            if isinstance(recipe_list, dict): recipe_list = [recipe_list] # API JSON format protection
+            if isinstance(recipe_list, dict): recipe_list = [recipe_list] 
             
             for r_stub in recipe_list:
                 recipe_id = r_stub.get('recipe_id')
                 
-                # Extracción Profunda por cada Receta
                 det_params = {
                     "method": "recipe.get",
                     "format": "json",
@@ -187,7 +204,6 @@ def fetch_fatsecret_recipes():
                 r_data = det_res.json().get('recipe', {})
                 if not r_data: continue
                 
-                # Macros Parsing
                 serving = r_data.get('serving_sizes', {}).get('serving', {})
                 if isinstance(serving, list): serving = serving[0]
                 
@@ -196,37 +212,35 @@ def fetch_fatsecret_recipes():
                 carb = float(serving.get('carbohydrate', 0))
                 fat = float(serving.get('fat', 0))
                 
-                # Ingredients Parsing
                 ing_data = r_data.get('ingredients', {}).get('ingredient', [])
                 if isinstance(ing_data, dict): ing_data = [ing_data]
                 ing_str = ", ".join([ing.get('ingredient_description', '') for ing in ing_data])
                 
-                # Instructions Parsing
                 dir_data = r_data.get('directions', {}).get('direction', [])
                 if isinstance(dir_data, dict): dir_data = [dir_data]
                 inst_str = " ".join([d.get('direction_description', '') for d in dir_data])
                 
-                # Time Parsing
                 prep_time = int(r_data.get('preparation_time_min', 0))
                 cook_time = int(r_data.get('cooking_time_min', 0))
                 ready_in = prep_time + cook_time if (prep_time or cook_time) else 30
                 
-                # Tagging logic (FatSecret doesn't label diets cleanly)
                 diets = [q] if q in ['vegetarian', 'vegan', 'keto'] else []
                 name = r_data.get('recipe_name', 'Receta')
                 
-                search_context = f"{name}. Diets: {', '.join(diets)}. Ready in {ready_in} mins. Ingredients: {ing_str}. Instructions: {inst_str}"
-                
-                recipes.append({
+                doc = {
                     'id': f"rec_fs_{recipe_id}", 
                     'name': name,
                     'ready_in_minutes': ready_in,
                     'diets': diets,                       
                     'macros': {'calories': int(cal), 'protein_g': round(pro, 1), 'carbs_g': round(carb, 1), 'fats_g': round(fat, 1)},
-                    'search_context': search_context[:1000]
-                })
+                    'ingredients': ing_str,
+                    'instructions': inst_str
+                }
+                
+                # search_context dinámico como JSON
+                doc['search_context'] = json.dumps(doc, ensure_ascii=False)
+                recipes.append(doc)
             
-            # Pausa para respetar el Rate Limit de FatSecret
             time.sleep(0.5) 
                 
         print(f"  ✓ Éxito: {len(recipes)} recetas altamente detalladas extraídas de FatSecret.")
