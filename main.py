@@ -69,14 +69,21 @@ def search_elasticsearch(index_name: str, query_vector: list, k: int = 3):
             "k": k,
             "num_candidates": 50
         },
-        "_source": ["name", "search_context", "category", "description", "ingredients"]
+        "_source": ["search_context"]
     }
     
     try:
         response = es_client.search(index=index_name, body=search_query)
         results = []
         for hit in response["hits"]["hits"]:
-            results.append(hit["_source"])
+            # Parse JSON string from search_context to get full structured data
+            import json
+            try:
+                parsed_data = json.loads(hit["_source"]["search_context"])
+                results.append(parsed_data)
+            except:
+                # Fallback if search_context is not valid JSON
+                results.append(hit["_source"])
         return results
     except Exception as e:
         print(f"Error searching {index_name}: {e}")
@@ -105,14 +112,30 @@ def get_recommendation(request: QueryRequest):
     exercises = search_elasticsearch("exercises", query_vector, k=3)
     recipes = search_elasticsearch("recipes", query_vector, k=3)
     
-    # Prepare context for LLM
+    # Prepare context for LLM with structured data from new schema
     context_text = "RETRIEVED EXERCISES:\n"
     for ex in exercises:
-        context_text += f"- {ex.get('search_context', '')}\n"
+        context_text += f"- Name: {ex.get('name', 'Unknown')}\n"
+        context_text += f"  Target Muscle: {ex.get('target_muscle', 'N/A')}\n"
+        context_text += f"  Equipment: {ex.get('equipment', 'N/A')}\n"
+        context_text += f"  Intensity (MET): {ex.get('estimated_met', 'N/A')}\n"
+        context_text += f"  Instructions: {ex.get('instructions', 'No instructions')}\n\n"
     
-    context_text += "\nRETRIEVED RECIPES:\n"
+    context_text += "RETRIEVED RECIPES:\n"
     for rec in recipes:
-        context_text += f"- {rec.get('search_context', '')}\n"
+        context_text += f"- Name: {rec.get('name', 'Unknown')}\n"
+        context_text += f"  Ingredients: {rec.get('ingredients', 'Not listed')}\n"
+        if 'macros' in rec:
+            m = rec['macros']
+            context_text += f"  Macros: {m.get('calories', 0)} cal, "
+            context_text += f"{m.get('protein_g', 0)}g protein, "
+            context_text += f"{m.get('carbs_g', 0)}g carbs, "
+            context_text += f"{m.get('fats_g', 0)}g fats\n"
+        if 'diets' in rec and rec['diets']:
+            context_text += f"  Diet Tags: {', '.join(rec['diets'])}\n"
+        if 'ready_in_minutes' in rec:
+            context_text += f"  Prep Time: {rec['ready_in_minutes']} minutes\n"
+        context_text += f"  Instructions: {rec.get('instructions', 'No instructions')}\n\n"
     
     # 3. Generate response with OpenAI
     system_prompt = """You are an expert fitness trainer and nutritionist. Your goal is to create a personalized plan based ONLY on the exercises and recipes provided in the context.
@@ -121,10 +144,12 @@ Use a motivating and clear tone. Format your response with Markdown (use bold an
 
 IMPORTANT RULES:
 1. Only recommend exercises and recipes from the provided context
-2. Provide specific, actionable advice
-3. Consider the user's profile (age, sex, weight, height)
-4. Structure your response clearly
-5. Be encouraging and supportive"""
+2. Leverage the detailed nutritional data (macros, calories) and exercise metrics (MET values, target muscles, equipment)
+3. Provide specific, actionable advice considering the user's profile (age, sex, weight, height)
+4. Explain how MET values relate to calorie burn based on user weight
+5. Use macro information to create balanced meal plans
+6. Structure your response clearly with workout and nutrition sections
+7. Be encouraging and supportive"""
 
     user_prompt = f"""User Profile: {request.user_profile.age} years old, {request.user_profile.sex}, {request.user_profile.weight_kg}kg, {request.user_profile.height_cm}cm.
 

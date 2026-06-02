@@ -49,7 +49,7 @@ def search_elasticsearch(es_client, query_embedding):
     print("Searching Elasticsearch...")
     
     try:
-        # Search exercises
+        # Search exercises - get search_context which contains full JSON
         exercises_query = {
             "knn": {
                 "field": "embedding",
@@ -57,12 +57,20 @@ def search_elasticsearch(es_client, query_embedding):
                 "k": 3,
                 "num_candidates": 50
             },
-            "_source": ["name", "description"]
+            "_source": ["search_context"]
         }
         exercises_response = es_client.search(index="exercises", body=exercises_query)
-        exercises = [hit['_source'] for hit in exercises_response['hits']['hits']]
+        exercises = []
+        for hit in exercises_response['hits']['hits']:
+            import json
+            # Parse JSON string from search_context
+            try:
+                exercise_data = json.loads(hit['_source']['search_context'])
+                exercises.append(exercise_data)
+            except:
+                exercises.append(hit['_source'])
         
-        # Search recipes
+        # Search recipes - get search_context which contains full JSON
         recipes_query = {
             "knn": {
                 "field": "embedding",
@@ -70,10 +78,18 @@ def search_elasticsearch(es_client, query_embedding):
                 "k": 3,
                 "num_candidates": 50
             },
-            "_source": ["name", "ingredients"]
+            "_source": ["search_context"]
         }
         recipes_response = es_client.search(index="recipes", body=recipes_query)
-        recipes = [hit['_source'] for hit in recipes_response['hits']['hits']]
+        recipes = []
+        for hit in recipes_response['hits']['hits']:
+            import json
+            # Parse JSON string from search_context
+            try:
+                recipe_data = json.loads(hit['_source']['search_context'])
+                recipes.append(recipe_data)
+            except:
+                recipes.append(hit['_source'])
         
         print(f"Found {len(exercises)} exercises and {len(recipes)} recipes")
         return exercises, recipes
@@ -90,9 +106,30 @@ def call_openai(user_query, exercises, recipes):
         print("No OpenAI API key found. Using fallback response...")
         return generate_fallback_response(exercises, recipes)
     
-    # Prepare context strings
-    exercises_str = "\n".join([f"- {ex['name']}: {ex['description']}" for ex in exercises])
-    recipes_str = "\n".join([f"- {r['name']}: {r['ingredients']}" for r in recipes])
+    # Prepare context strings with new schema
+    exercises_str = ""
+    for ex in exercises:
+        exercises_str += f"- {ex.get('name', 'Unknown')}: "
+        exercises_str += f"{ex.get('instructions', ex.get('description', 'No details'))} "
+        exercises_str += f"(Target: {ex.get('target_muscle', 'N/A')}, "
+        exercises_str += f"Equipment: {ex.get('equipment', 'N/A')}, "
+        exercises_str += f"Intensity MET: {ex.get('estimated_met', 'N/A')})\n"
+    
+    recipes_str = ""
+    for r in recipes:
+        recipes_str += f"- {r.get('name', 'Unknown')}: "
+        recipes_str += f"{r.get('ingredients', 'No ingredients listed')} "
+        if 'macros' in r:
+            m = r['macros']
+            recipes_str += f"(Calories: {m.get('calories', 0)}, "
+            recipes_str += f"Protein: {m.get('protein_g', 0)}g, "
+            recipes_str += f"Carbs: {m.get('carbs_g', 0)}g, "
+            recipes_str += f"Fats: {m.get('fats_g', 0)}g) "
+        if 'diets' in r and r['diets']:
+            recipes_str += f"[{', '.join(r['diets'])}] "
+        if 'ready_in_minutes' in r:
+            recipes_str += f"Ready in: {r['ready_in_minutes']} min"
+        recipes_str += "\n"
     
     # Build messages for Chat Completions API
     messages = [
@@ -190,7 +227,11 @@ def generate_fallback_response(exercises, recipes):
     if exercises:
         response += "**RECOMMENDED EXERCISES:**\n\n"
         for i, ex in enumerate(exercises, 1):
-            response += f"{i}. {ex['name']}: {ex['description']}\n"
+            response += f"{i}. {ex.get('name', 'Unknown')}: "
+            response += f"{ex.get('instructions', ex.get('description', 'No details available'))}\n"
+            response += f"   - Target Muscle: {ex.get('target_muscle', 'N/A')}\n"
+            response += f"   - Equipment: {ex.get('equipment', 'N/A')}\n"
+            response += f"   - Intensity (MET): {ex.get('estimated_met', 'N/A')}\n"
         response += "\n**Training Tips:**\n"
         response += "- Perform 3 sets of 8-12 repetitions for each exercise\n"
         response += "- Rest 60-90 seconds between sets\n"
@@ -200,7 +241,18 @@ def generate_fallback_response(exercises, recipes):
     if recipes:
         response += "**RECOMMENDED NUTRITION:**\n\n"
         for i, recipe in enumerate(recipes, 1):
-            response += f"{i}. {recipe['name']}: {recipe['ingredients']}\n"
+            response += f"{i}. {recipe.get('name', 'Unknown')}\n"
+            response += f"   - Ingredients: {recipe.get('ingredients', 'Not listed')}\n"
+            if 'macros' in recipe:
+                m = recipe['macros']
+                response += f"   - Macros: {m.get('calories', 0)} cal | "
+                response += f"{m.get('protein_g', 0)}g protein | "
+                response += f"{m.get('carbs_g', 0)}g carbs | "
+                response += f"{m.get('fats_g', 0)}g fats\n"
+            if 'diets' in recipe and recipe['diets']:
+                response += f"   - Diet Tags: {', '.join(recipe['diets'])}\n"
+            if 'ready_in_minutes' in recipe:
+                response += f"   - Prep Time: {recipe['ready_in_minutes']} minutes\n"
         response += "\n**Nutrition Tips:**\n"
         response += "- Aim for 0.7-1g of protein per pound of body weight daily\n"
         response += "- Eat protein-rich meals within 2 hours post-workout\n"
