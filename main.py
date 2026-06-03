@@ -308,7 +308,7 @@ Prioritize recipes with IDs starting with "rec_fs_" (FatSecret) for accurate mac
             ],
             model="gpt-5.4-mini",  # GPT-5.4 mini: strongest mini model for coding, computer use, and subagents
             temperature=0.7,
-            max_tokens=4000,
+            max_completion_tokens=4000,  # GPT-5+ uses max_completion_tokens instead of max_tokens
             response_format={"type": "json_object"}
         )
         
