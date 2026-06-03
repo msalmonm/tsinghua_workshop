@@ -118,17 +118,85 @@ def get_recommendation(request: QueryRequest):
     exercises = search_elasticsearch("exercises", query_vector, k=10)
     recipes = search_elasticsearch("recipes", query_vector, k=15, boost_fatsecret=True)
     
-    # 3. Build user profile summary
+    # 3. Calculate nutritional targets (Senior Nutritionist logic)
+    # Base caloric needs by sex
+    base_calories = 2000 if request.user_profile.sex.lower() in ['male', 'hombre', 'm'] else 1800
+    
+    # Adjust based on goal detection (smart parsing)
+    goal_lower = request.query.lower()
+    
+    # Goal classification with mixed goal detection
+    has_weight_loss = any(word in goal_lower for word in ['perder', 'bajar', 'lose', 'weight loss', 'adelgazar', 'reducir', 'grasa', 'fat'])
+    has_muscle_gain = any(word in goal_lower for word in ['ganar', 'aumentar', 'bulk', 'masa', 'gain', 'muscle', 'músculo', 'muscular'])
+    
+    if has_weight_loss and has_muscle_gain:
+        # Mixed goals = body recomposition
+        goal_type = 'recomp'
+        calorie_adjustment = -0.10  # Slight deficit
+        protein_multiplier = 2.2  # Very high protein for recomp
+    elif has_weight_loss:
+        goal_type = 'weight_loss'
+        calorie_adjustment = -0.20  # 20% deficit
+        protein_multiplier = 2.0  # High protein to preserve muscle
+    elif has_muscle_gain:
+        goal_type = 'muscle_gain'
+        calorie_adjustment = 0.15  # 15% surplus
+        protein_multiplier = 1.8
+    elif any(word in goal_lower for word in ['mantener', 'maintain', 'tonificar', 'tone']):
+        goal_type = 'maintenance'
+        calorie_adjustment = 0.0  # Maintenance
+        protein_multiplier = 1.6
+    else:
+        # Default to maintenance if unclear
+        goal_type = 'maintenance'
+        calorie_adjustment = 0.0
+        protein_multiplier = 1.6
+    
+    # Calculate target calories
+    target_calories = int(base_calories * (1 + calorie_adjustment))
+    
+    # Protein target: g per kg body weight
+    target_protein_g = int(request.user_profile.weight_kg * protein_multiplier)
+    
+    # Fat target: 25-30% of calories
+    target_fats_g = int((target_calories * 0.275) / 9)  # 9 cal per g of fat
+    
+    # Carbs: remaining calories
+    protein_calories = target_protein_g * 4
+    fat_calories = target_fats_g * 9
+    target_carbs_g = int((target_calories - protein_calories - fat_calories) / 4)
+    
+    # BMI for context
     bmi = request.user_profile.weight_kg / ((request.user_profile.height_cm / 100) ** 2)
+    
+    # Debug logging
+    print(f"\n🧮 Nutritional Targets Calculated:")
+    print(f"   Goal Type: {goal_type}")
+    print(f"   Base Calories: {base_calories} → Target: {target_calories} ({calorie_adjustment:+.0%})")
+    print(f"   Protein: {target_protein_g}g ({protein_multiplier}x body weight)")
+    print(f"   Carbs: {target_carbs_g}g | Fats: {target_fats_g}g")
+    # 4. Build user profile summary
     user_profile_summary = {
         "age": request.user_profile.age,
         "sex": request.user_profile.sex,
         "weight_kg": request.user_profile.weight_kg,
         "height_cm": request.user_profile.height_cm,
-        "bmi": round(bmi, 2)
+        "bmi": round(bmi, 2),
+        "goal_type": goal_type,
+        "target_calories": target_calories,
+        "target_protein_g": target_protein_g,
+        "target_carbs_g": target_carbs_g,
+        "target_fats_g": target_fats_g
     }
     
-    # 4. Categorize recipes (simple heuristic)
+    # 5. Categorize recipes by meal type AND calorie targets
+    # Breakfast: 25-30% of daily calories
+    # Lunch: 35-40% of daily calories  
+    # Dinner: 30-35% of daily calories
+    breakfast_target = target_calories * 0.275
+    lunch_target = target_calories * 0.375
+    dinner_target = target_calories * 0.35
+    
     breakfast_recipes = []
     lunch_recipes = []
     dinner_recipes = []
@@ -137,11 +205,19 @@ def get_recommendation(request: QueryRequest):
         calories = recipe.get('macros', {}).get('calories', 0)
         ready_time = recipe.get('ready_in_minutes', 30)
         
-        if calories < 400 and ready_time < 30 and len(breakfast_recipes) < 3:
+        # Smart categorization based on calories and timing
+        if abs(calories - breakfast_target) < 200 and len(breakfast_recipes) < 3:
             breakfast_recipes.append(recipe)
-        elif 400 <= calories < 600 and len(lunch_recipes) < 3:
+        elif abs(calories - lunch_target) < 250 and len(lunch_recipes) < 3:
             lunch_recipes.append(recipe)
-        elif len(dinner_recipes) < 3:
+        elif abs(calories - dinner_target) < 250 and len(dinner_recipes) < 3:
+            dinner_recipes.append(recipe)
+        # Fallback: use calorie ranges
+        elif calories < breakfast_target + 100 and len(breakfast_recipes) < 3:
+            breakfast_recipes.append(recipe)
+        elif breakfast_target < calories < lunch_target + 100 and len(lunch_recipes) < 3:
+            lunch_recipes.append(recipe)
+        elif calories >= lunch_target and len(dinner_recipes) < 3:
             dinner_recipes.append(recipe)
     
     # Fill missing slots
@@ -206,39 +282,69 @@ def get_recommendation(request: QueryRequest):
         "total_daily_fats_g_avg": round(total_fats, 1)
     }
     
-    # 8. Build macro bars
+    # 8. Build macro bars with smart targets
     macro_bars = [
-        {"label": "Calories", "value": total_cal, "unit": "kcal", "target": 2000},
-        {"label": "Protein", "value": total_pro, "unit": "g", "target": int(request.user_profile.weight_kg * 1.6)},
-        {"label": "Carbs", "value": total_carbs, "unit": "g", "target": 200},
-        {"label": "Fats", "value": total_fats, "unit": "g", "target": 65}
+        {"label": "Calories", "value": total_cal, "unit": "kcal", "target": target_calories},
+        {"label": "Protein", "value": total_pro, "unit": "g", "target": target_protein_g},
+        {"label": "Carbs", "value": total_carbs, "unit": "g", "target": target_carbs_g},
+        {"label": "Fats", "value": total_fats, "unit": "g", "target": target_fats_g}
     ]
     
-    # 9. Ask LLM for personalization ONLY
-    llm_prompt = f"""You are a fitness expert. Generate personalized recommendations and weekly calendar.
+    # 9. Ask LLM for personalization with nutritionist context
+    llm_prompt = f"""You are a SENIOR NUTRITIONIST and fitness expert. Generate personalized recommendations.
 
-User: {request.user_profile.age}y {request.user_profile.sex}, {request.user_profile.weight_kg}kg, {request.user_profile.height_cm}cm (BMI: {bmi:.1f})
-Goal: {request.query}
+User Profile:
+- {request.user_profile.age}y {request.user_profile.sex}, {request.user_profile.weight_kg}kg, {request.user_profile.height_cm}cm
+- BMI: {bmi:.1f}
+- Goal: {request.query}
+- Goal Type Detected: {goal_type}
 
-Available: {len(meal_options['breakfast'])} breakfast, {len(meal_options['lunch'])} lunch, {len(meal_options['dinner'])} dinner options + {len(workout_options)} exercises
+NUTRITIONAL TARGETS (calculated by senior nutritionist):
+- Daily Calories: {target_calories} kcal ({base_calories} base + {calorie_adjustment:+.0%} adjustment)
+- Protein: {target_protein_g}g ({protein_multiplier}g/kg body weight)
+- Carbs: {target_carbs_g}g
+- Fats: {target_fats_g}g
 
-CRITICAL: Respond in SAME LANGUAGE as goal query.
+Available Resources:
+- {len(meal_options['breakfast'])} breakfast options (~{int(breakfast_target)} cal each)
+- {len(meal_options['lunch'])} lunch options (~{int(lunch_target)} cal each)
+- {len(meal_options['dinner'])} dinner options (~{int(dinner_target)} cal each)
+- {len(workout_options)} exercises
+
+CRITICAL INSTRUCTIONS:
+1. Respond in the SAME LANGUAGE as the user's goal query
+2. Consider the nutritional targets when assigning meals
+3. Distribute meals to meet daily calorie target
+4. Prioritize protein-rich options for muscle goals
+5. Suggest appropriate workout frequency for goal type
 
 Return JSON:
 {{
-  "plan_summary": {{"title": "", "goal_detected": "", "short_summary": "", "focus": "", "difficulty_level": ""}},
+  "plan_summary": {{
+    "title": "Brief title in user's language",
+    "goal_detected": "{goal_type}",
+    "short_summary": "1-2 sentence summary considering nutritional science",
+    "focus": "Main nutritional focus",
+    "difficulty_level": "Beginner/Intermediate/Advanced"
+  }},
   "weekly_calendar": [
-    {{"day": "Monday", "breakfast_index": 0, "lunch_index": 0, "dinner_index": 0, "workout_exercise_indices": [0,1,2], "workout_focus": "Upper body", "notes": ""}}
+    {{"day": "Monday", "breakfast_index": 0, "lunch_index": 0, "dinner_index": 0, "workout_exercise_indices": [0,1,2], "workout_focus": "Upper body", "notes": "Brief tip"}}
   ],
-  "ai_recommendations": {{"main_tip": "", "personalized_notes": [], "nutrition_tips": [], "workout_tips": [], "safety_notes": []}}
+  "ai_recommendations": {{
+    "main_tip": "Key nutritional advice",
+    "personalized_notes": ["Note about their BMI/goals", "Hydration tip"],
+    "nutrition_tips": ["Macro distribution tip", "Meal timing tip"],
+    "workout_tips": ["Training frequency for goal", "Recovery tip"],
+    "safety_notes": ["Important safety consideration"]
+  }}
 }}
 
-Rules: 7 days, use indices 0-2 for meals and 0-5 for exercises, suggest 3 workout days, rest days have workout_exercise_indices=[], be concise"""
+Rules: 7 days, use indices 0-2 for meals and 0-5 for exercises, suggest workout days based on goal (weight_loss=4-5 days, muscle_gain=4 days, maintenance=3 days, recomp=5 days), rest days have workout_exercise_indices=[]"""
 
-    # Try models
+    # Try models (gpt-4o-mini first as primary, more stable and widely available)
     models_to_try = [
-        {"name": "gpt-5.4-mini", "max_param": "max_completion_tokens"},
-        {"name": "gpt-4o-mini", "max_param": "max_tokens"}
+        {"name": "gpt-4o-mini", "max_param": "max_tokens"},
+        {"name": "gpt-5.4-mini", "max_param": "max_completion_tokens"}
     ]
     
     llm_data = None
