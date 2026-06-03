@@ -318,13 +318,14 @@ Prioritize recipes with IDs starting with "rec_fs_" (FatSecret) for accurate mac
                 ],
                 "model": model_config["name"],
                 "temperature": 0.7,
-                model_config["max_param"]: 4000,
+                model_config["max_param"]: 8000,  # Increased to handle complete JSON response
                 "response_format": {"type": "json_object"}
             }
             
             chat_completion = openai_client.chat.completions.create(**params)
             final_response = chat_completion.choices[0].message.content
             print(f"✓ Successfully used model: {model_config['name']}")
+            print(f"  Response length: {len(final_response)} chars")
             break
             
         except Exception as e:
@@ -339,31 +340,25 @@ Prioritize recipes with IDs starting with "rec_fs_" (FatSecret) for accurate mac
     
     if not final_response:
         raise HTTPException(status_code=500, detail=f"No model succeeded. Last error: {str(last_error)}")
-        
-        # Parse JSON response
-        import json
-        try:
-            parsed_json = json.loads(final_response)
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=500, detail="OpenAI returned invalid JSON")
-        
-        # Return structured JSON plan
-        return {
-            "response": final_response,  # Complete JSON plan as string (for backward compatibility)
-            "plan": parsed_json,          # Parsed JSON object
-            "raw_data": {
-                "exercises": exercises,
-                "recipes": recipes
-            }
-        }
     
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        error_detail = f"Unexpected error: {str(e)}"
-        print(f"Traceback: {traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=error_detail)
+    # Parse JSON response
+    import json
+    try:
+        parsed_json = json.loads(final_response)
+    except json.JSONDecodeError as e:
+        print(f"✗ JSON parsing failed: {str(e)}")
+        print(f"Response preview (first 500 chars): {final_response[:500]}")
+        raise HTTPException(status_code=500, detail=f"OpenAI returned invalid JSON: {str(e)}")
+    
+    # Return structured JSON plan
+    return {
+        "response": final_response,  # Complete JSON plan as string (for backward compatibility)
+        "plan": parsed_json,          # Parsed JSON object
+        "raw_data": {
+            "exercises": exercises,
+            "recipes": recipes
+        }
+    }
 
 @app.get("/")
 def root():
