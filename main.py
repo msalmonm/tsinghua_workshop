@@ -57,17 +57,26 @@ class QueryRequest(BaseModel):
     user_profile: UserProfile
 
 class RecommendationResponse(BaseModel):
-    response: str
-    raw_data: dict
+    response: str  # JSON string (for backward compatibility)
+    plan: dict     # Parsed JSON plan
+    raw_data: dict # Raw retrieved exercises and recipes
 
-def search_elasticsearch(index_name: str, query_vector: list, k: int = 3):
-    """Perform k-NN search in Elasticsearch"""
+def search_elasticsearch(index_name: str, query_vector: list, k: int = 3, boost_fatsecret: bool = False):
+    """
+    Perform k-NN search in Elasticsearch with optional FatSecret prioritization.
+    
+    Args:
+        index_name: Index to search (exercises or recipes)
+        query_vector: Query embedding vector
+        k: Number of results to retrieve
+        boost_fatsecret: If True, prioritize FatSecret recipes (IDs starting with 'rec_fs_')
+    """
     search_query = {
         "knn": {
             "field": "embedding",
             "query_vector": query_vector,
-            "k": k,
-            "num_candidates": 50
+            "k": k * 3 if boost_fatsecret else k,  # Retrieve more for filtering
+            "num_candidates": 100 if boost_fatsecret else 50
         },
         "_source": ["search_context"]
     }
@@ -75,15 +84,30 @@ def search_elasticsearch(index_name: str, query_vector: list, k: int = 3):
     try:
         response = es_client.search(index=index_name, body=search_query)
         results = []
+        
         for hit in response["hits"]["hits"]:
             # Parse JSON string from search_context to get full structured data
             import json
             try:
                 parsed_data = json.loads(hit["_source"]["search_context"])
+                parsed_data["_score"] = hit["_score"]  # Preserve relevance score
                 results.append(parsed_data)
             except:
                 # Fallback if search_context is not valid JSON
-                results.append(hit["_source"])
+                fallback_data = hit["_source"]
+                fallback_data["_score"] = hit["_score"]
+                results.append(fallback_data)
+        
+        # Prioritize FatSecret recipes if requested
+        if boost_fatsecret and index_name == "recipes":
+            fatsecret_recipes = [r for r in results if r.get("id", "").startswith("rec_fs_")]
+            other_recipes = [r for r in results if not r.get("id", "").startswith("rec_fs_")]
+            
+            # Return FatSecret first, then others, up to k total
+            results = (fatsecret_recipes + other_recipes)[:k]
+        else:
+            results = results[:k]
+        
         return results
     except Exception as e:
         print(f"Error searching {index_name}: {e}")
@@ -108,57 +132,173 @@ def get_recommendation(request: QueryRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating embedding: {str(e)}")
     
-    # 2. Retrieve context from Elasticsearch
-    exercises = search_elasticsearch("exercises", query_vector, k=3)
-    recipes = search_elasticsearch("recipes", query_vector, k=3)
+    # 2. Retrieve context from Elasticsearch (prioritize FatSecret for recipes)
+    exercises = search_elasticsearch("exercises", query_vector, k=10)
+    recipes = search_elasticsearch("recipes", query_vector, k=15, boost_fatsecret=True)
     
-    # Prepare context for LLM with structured data from new schema
-    context_text = "RETRIEVED EXERCISES:\n"
-    for ex in exercises:
-        context_text += f"- Name: {ex.get('name', 'Unknown')}\n"
-        context_text += f"  Target Muscle: {ex.get('target_muscle', 'N/A')}\n"
-        context_text += f"  Equipment: {ex.get('equipment', 'N/A')}\n"
-        context_text += f"  Intensity (MET): {ex.get('estimated_met', 'N/A')}\n"
-        context_text += f"  Instructions: {ex.get('instructions', 'No instructions')}\n\n"
+    # Prepare comprehensive context with all retrieved data
+    import json
+    context_json = {
+        "exercises": exercises,
+        "recipes": recipes
+    }
+    context_text = json.dumps(context_json, ensure_ascii=False, indent=2)
     
-    context_text += "RETRIEVED RECIPES:\n"
-    for rec in recipes:
-        context_text += f"- Name: {rec.get('name', 'Unknown')}\n"
-        context_text += f"  Ingredients: {rec.get('ingredients', 'Not listed')}\n"
-        if 'macros' in rec:
-            m = rec['macros']
-            context_text += f"  Macros: {m.get('calories', 0)} cal, "
-            context_text += f"{m.get('protein_g', 0)}g protein, "
-            context_text += f"{m.get('carbs_g', 0)}g carbs, "
-            context_text += f"{m.get('fats_g', 0)}g fats\n"
-        if 'diets' in rec and rec['diets']:
-            context_text += f"  Diet Tags: {', '.join(rec['diets'])}\n"
-        if 'ready_in_minutes' in rec:
-            context_text += f"  Prep Time: {rec['ready_in_minutes']} minutes\n"
-        context_text += f"  Instructions: {rec.get('instructions', 'No instructions')}\n\n"
-    
-    # 3. Generate response with OpenAI
-    system_prompt = """You are an expert fitness trainer and nutritionist. Your goal is to create a personalized plan based ONLY on the exercises and recipes provided in the context.
+    # 3. Generate response with OpenAI GPT-4o-mini (structured JSON output)
+    system_prompt = """You are a fitness and nutrition planning assistant.
 
-Use a motivating and clear tone. Format your response with Markdown (use bold and lists).
+Use ONLY the retrieved exercises and recipes from the DATABASE CONTEXT.
+Return ONLY valid JSON.
+Do not return Markdown.
+Do not invent exercises or recipes.
 
-IMPORTANT RULES:
-1. Only recommend exercises and recipes from the provided context
-2. Leverage the detailed nutritional data (macros, calories) and exercise metrics (MET values, target muscles, equipment)
-3. Provide specific, actionable advice considering the user's profile (age, sex, weight, height)
-4. Explain how MET values relate to calorie burn based on user weight
-5. Use macro information to create balanced meal plans
-6. Structure your response clearly with workout and nutrition sections
-7. Be encouraging and supportive"""
+The frontend will use this JSON to render a single-page dashboard with a weekly calendar.
 
-    user_prompt = f"""User Profile: {request.user_profile.age} years old, {request.user_profile.sex}, {request.user_profile.weight_kg}kg, {request.user_profile.height_cm}cm.
+The plan must consider:
+- user profile
+- user goal
+- allergies or restrictions if mentioned
+- diet type if mentioned
+- number of workout days if mentioned
+- available recipes and exercises from the retrieved context
 
-Goal: {request.query}
+CRITICAL: Always respond in the SAME LANGUAGE as the user's query. 
+- If query is in Spanish, return all text fields in Spanish.
+- If query is in English, return all text fields in English.
+- If query is in Chinese, return all text fields in Chinese.
 
-DATABASE CONTEXT:
+PRIORITIZATION RULE: Recipes with IDs starting with "rec_fs_" are from FatSecret and contain detailed macro data. 
+ALWAYS prioritize these recipes over others (rec_mdb_*) when creating meal plans.
+
+Return exactly this JSON structure:
+{
+  "plan_summary": {
+    "title": "",
+    "goal_detected": "",
+    "short_summary": "",
+    "focus": "",
+    "difficulty_level": ""
+  },
+  "user_profile_summary": {
+    "age": 0,
+    "sex": "",
+    "weight_kg": 0,
+    "height_cm": 0,
+    "bmi": 0
+  },
+  "nutrition_summary": {
+    "total_daily_calories_avg": 0,
+    "total_daily_protein_g_avg": 0,
+    "total_daily_carbs_g_avg": 0,
+    "total_daily_fats_g_avg": 0,
+    "macro_notes": ""
+  },
+  "macro_bars": [
+    {"label": "Calories", "value": 0, "unit": "kcal", "target": 0},
+    {"label": "Protein", "value": 0, "unit": "g", "target": 0},
+    {"label": "Carbs", "value": 0, "unit": "g", "target": 0},
+    {"label": "Fats", "value": 0, "unit": "g", "target": 0}
+  ],
+  "meal_options": {
+    "breakfast": [
+      {
+        "recipe_id": "",
+        "recipe_name": "",
+        "description": "",
+        "image_url": "",
+        "recipe_url": "",
+        "rating": null,
+        "ready_in_minutes": null,
+        "diet_tags": [],
+        "calories": 0,
+        "protein_g": 0,
+        "carbs_g": 0,
+        "fats_g": 0,
+        "ingredients": "",
+        "instructions": "",
+        "reason_selected": ""
+      }
+    ],
+    "lunch": [],
+    "dinner": []
+  },
+  "workout_options": [
+    {
+      "exercise_id": "",
+      "name": "",
+      "target_muscle": "",
+      "secondary_muscles": [],
+      "equipment": "",
+      "estimated_met": null,
+      "sets": 0,
+      "reps": "",
+      "rest_seconds": 0,
+      "instructions": "",
+      "reason_selected": ""
+    }
+  ],
+  "weekly_calendar": [
+    {
+      "day": "Monday",
+      "breakfast": "",
+      "lunch": "",
+      "dinner": "",
+      "workout": {
+        "focus": "",
+        "exercises": []
+      },
+      "daily_totals": {
+        "calories": 0,
+        "protein_g": 0,
+        "carbs_g": 0,
+        "fats_g": 0
+      },
+      "notes": ""
+    }
+  ],
+  "ai_recommendations": {
+    "main_tip": "",
+    "personalized_notes": [],
+    "nutrition_tips": [],
+    "workout_tips": [],
+    "safety_notes": []
+  },
+  "retrieved_data_summary": {
+    "recipes_used": [],
+    "exercises_used": [],
+    "ir_explanation": ""
+  }
+}
+
+Planning rules:
+1. Create exactly 3 breakfast options, 3 lunch options, and 3 dinner options when enough recipes are available.
+2. If there are not enough recipes, reuse the best available recipes logically and explain this in the notes.
+3. Create a weekly calendar from Monday to Sunday (7 days).
+4. Assign meals to each day using the selected meal options.
+5. Assign workout routines only on the number of workout days requested by the user.
+6. If the user does not specify workout days, default to 3 workout days per week.
+7. On non-workout days, set workout focus to "Rest day" and exercises to an empty array.
+8. Respect allergies, restrictions, diet type, and preferences mentioned in the user query.
+9. Calculate daily totals from the selected breakfast, lunch, and dinner.
+10. Macro bars should represent average daily macros across the weekly calendar.
+11. Keep recommendations short, useful, and dashboard-friendly.
+12. ALWAYS prioritize FatSecret recipes (rec_fs_*) because they have complete macro data.
+13. Calculate BMI using the formula: weight_kg / (height_cm/100)^2"""
+
+    user_prompt = f"""User Profile:
+- Age: {request.user_profile.age} years old
+- Sex: {request.user_profile.sex}
+- Weight: {request.user_profile.weight_kg} kg
+- Height: {request.user_profile.height_cm} cm
+
+User Goal/Query: {request.query}
+
+DATABASE CONTEXT (Retrieved from Elasticsearch using k-NN semantic search):
 {context_text}
 
-Please generate a personalized recommendation using this context."""
+Generate a complete weekly fitness and nutrition plan using ONLY the exercises and recipes provided above.
+Remember: Respond in the same language as the user's query.
+Prioritize recipes with IDs starting with "rec_fs_" (FatSecret) for accurate macro tracking."""
 
     try:
         chat_completion = openai_client.chat.completions.create(
@@ -166,16 +306,25 @@ Please generate a personalized recommendation using this context."""
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            model="gpt-4o-mini",
+            model="gpt-5.4-mini",  # GPT-5.4 mini: strongest mini model for coding, computer use, and subagents
             temperature=0.7,
-            max_tokens=800
+            max_tokens=4000,
+            response_format={"type": "json_object"}
         )
         
         final_response = chat_completion.choices[0].message.content
         
-        # Return both natural language response and raw data for UI
+        # Parse JSON response
+        import json
+        try:
+            parsed_json = json.loads(final_response)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="OpenAI returned invalid JSON")
+        
+        # Return structured JSON plan
         return {
-            "response": final_response,
+            "response": final_response,  # Complete JSON plan as string (for backward compatibility)
+            "plan": parsed_json,          # Parsed JSON object
             "raw_data": {
                 "exercises": exercises,
                 "recipes": recipes
