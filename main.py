@@ -300,19 +300,45 @@ Generate a complete weekly fitness and nutrition plan using ONLY the exercises a
 Remember: Respond in the same language as the user's query.
 Prioritize recipes with IDs starting with "rec_fs_" (FatSecret) for accurate macro tracking."""
 
-    try:
-        chat_completion = openai_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            model="gpt-5.4-mini",  # GPT-5.4 mini: strongest mini model for coding, computer use, and subagents
-            temperature=0.7,
-            max_completion_tokens=4000,  # GPT-5+ uses max_completion_tokens instead of max_tokens
-            response_format={"type": "json_object"}
-        )
-        
-        final_response = chat_completion.choices[0].message.content
+    # Try GPT-5.4-mini first, fallback to GPT-4o-mini if needed
+    models_to_try = [
+        {"name": "gpt-5.4-mini", "max_param": "max_completion_tokens"},
+        {"name": "gpt-4o-mini", "max_param": "max_tokens"}
+    ]
+    
+    final_response = None
+    last_error = None
+    
+    for model_config in models_to_try:
+        try:
+            params = {
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                "model": model_config["name"],
+                "temperature": 0.7,
+                model_config["max_param"]: 4000,
+                "response_format": {"type": "json_object"}
+            }
+            
+            chat_completion = openai_client.chat.completions.create(**params)
+            final_response = chat_completion.choices[0].message.content
+            print(f"✓ Successfully used model: {model_config['name']}")
+            break
+            
+        except Exception as e:
+            last_error = e
+            print(f"✗ Model {model_config['name']} failed: {str(e)}")
+            if model_config == models_to_try[-1]:  # Last model
+                import traceback
+                error_detail = f"All models failed. Last error: {str(e)}"
+                print(f"Traceback: {traceback.format_exc()}")
+                raise HTTPException(status_code=500, detail=error_detail)
+            continue
+    
+    if not final_response:
+        raise HTTPException(status_code=500, detail=f"No model succeeded. Last error: {str(last_error)}")
         
         # Parse JSON response
         import json
@@ -331,8 +357,13 @@ Prioritize recipes with IDs starting with "rec_fs_" (FatSecret) for accurate mac
             }
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OpenAI error: {str(e)}")
+        import traceback
+        error_detail = f"Unexpected error: {str(e)}"
+        print(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=error_detail)
 
 @app.get("/")
 def root():
