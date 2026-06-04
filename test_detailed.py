@@ -40,30 +40,24 @@ def test_payload(payload, test_name):
         plan = response.json()['plan']
         profile = plan['user_profile_summary']
         
-        print(f"\n📊 USER PROFILE (BMR/TDEE Method):")
-        print(f"   BMR: {profile.get('bmr', 'N/A')} kcal")
-        print(f"   Activity: {profile.get('activity_level', 'N/A')} (factor: {profile.get('activity_factor', 'N/A')})")
-        print(f"   TDEE: {profile.get('tdee', 'N/A')} kcal")
-        print(f"   Goal: {profile.get('goal_type', 'N/A')} ({profile.get('calorie_adjustment', 0):+.0%})")
-        print(f"   Safety Adjusted: {profile.get('safety_adjusted_goal', False)}")
+        print(f"\n📊 USER PROFILE:")
+        print(f"   Age: {profile.get('age')} years")
+        print(f"   Sex: {profile.get('sex')}")
+        print(f"   Weight: {profile.get('weight_kg')} kg")
+        print(f"   Height: {profile.get('height_cm')} cm")
+        print(f"   BMI: {profile.get('bmi')}")
+        print(f"   Activity: {profile.get('activity_level')}")
         
-        print(f"\n🎯 TARGETS vs ACHIEVED:")
+        print(f"\n📈 NUTRITION SUMMARY:")
         nutrition = plan['nutrition_summary']
-        print(f"   Calories: {nutrition['total_daily_calories_avg']} / {profile['target_calories']} kcal")
-        print(f"   Protein:  {nutrition['total_daily_protein_g_avg']}g / {profile['target_protein_g']}g")
-        print(f"   Carbs:    {nutrition['total_daily_carbs_g_avg']}g / {profile['target_carbs_g']}g")
-        print(f"   Fats:     {nutrition['total_daily_fats_g_avg']}g / {profile['target_fats_g']}g")
+        print(f"   Avg Daily Calories: {nutrition['avg_daily_calories']} kcal")
+        print(f"   Avg Daily Protein: {nutrition['avg_daily_protein_g']}g")
+        print(f"   Avg Daily Carbs: {nutrition['avg_daily_carbs_g']}g")
+        print(f"   Avg Daily Fats: {nutrition['avg_daily_fats_g']}g")
         
-        validation = plan.get('nutrition_validation', {})
-        print(f"\n✅ VALIDATION:")
-        print(f"   Calories in range: {validation.get('calories_within_range', False)}")
-        print(f"   Protein sufficient: {validation.get('protein_sufficient', False)}")
-        
-        warnings = validation.get('warnings', [])
-        if warnings:
-            print(f"\n⚠️ WARNINGS ({len(warnings)}):")
-            for w in warnings:
-                print(f"   - {w}")
+        print(f"\n📊 MACRO BARS:")
+        for bar in plan.get('macro_bars', []):
+            print(f"   {bar['label']}: {bar['value']} {bar['unit']}")
         
         safety_notes = plan.get('ai_recommendations', {}).get('safety_notes', [])
         if safety_notes:
@@ -71,15 +65,22 @@ def test_payload(payload, test_name):
             for note in safety_notes:
                 print(f"   - {note}")
         
-        print(f"\n📦 Available: {len(plan['meal_options'])} meals, {len(plan['snack_options'])} snacks")
+        print(f"\n📦 Resources:")
+        print(f"   Meals: {len(plan['meal_options'])}")
+        print(f"   Snacks: {len(plan['snack_options'])}")
+        print(f"   Exercises: {len(plan['workout_options'])}")
+        
+        print(f"\n📋 Plan:")
         print(f"   Title: {plan['plan_summary']['title']}")
+        print(f"   Goal: {plan['plan_summary']['goal_detected']}")
+        print(f"   Difficulty: {plan['plan_summary']['difficulty_level']}")
         
     else:
         print(f"❌ Error: {response.status_code}")
         print(response.text)
 
 # Run tests
-print("Testing Professional Nutrition-Tech API v3...")
-test_payload(payload1, "Normal muscle gain goal with BMR/TDEE")
-test_payload(payload2, "Extreme unsafe crash diet (should trigger safety)")
+print("Testing Clean API (no targets exposed)...")
+test_payload(payload1, "Normal muscle gain goal")
+test_payload(payload2, "Extreme crash diet request")
 

@@ -1,0 +1,1564 @@
+{
+  "response": "{\"plan_summary\": {\"title\": \"7-Day Muscle Gain Meal and Workout Plan\", \"goal_detected\": \"Muscle gain for a moderately active male\", \"short_summary\": \"This plan focuses on high-protein meals and balanced snacks to support muscle growth while incorporating strength training workouts.\", \"focus\": \"High-protein nutrition and strength training\", \"difficulty_level\": \"Intermediate\"}, \"user_profile_summary\": {\"age\": 25, \"sex\": \"male\", \"weight_kg\": 75.0, \"height_cm\": 178.0, \"bmi\": 23.67, \"activity_level\": \"moderately_active\"}, \"nutrition_summary\": {\"avg_daily_calories\": 2272, \"avg_daily_protein_g\": 140.3, \"avg_daily_carbs_g\": 254.2, \"avg_daily_fats_g\": 81.5}, \"macro_bars\": [{\"label\": \"Calories\", \"value\": 2272, \"unit\": \"kcal\"}, {\"label\": \"Protein\", \"value\": 140.3, \"unit\": \"g\"}, {\"label\": \"Carbs\", \"value\": 254.2, \"unit\": \"g\"}, {\"label\": \"Fats\", \"value\": 81.5, \"unit\": \"g\"}], \"meal_options\": [{\"recipe_id\": \"rec_fs_115\", \"recipe_name\": \"Beef with Black Bean Sauce\", \"ready_in_minutes\": 30, \"diet_tags\": [\"beef\"], \"base_calories\": 405, \"base_protein_g\": 51.7, \"base_carbs_g\": 16.3, \"base_fats_g\": 13.2, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 202, \"protein_g\": 25.9, \"carbs_g\": 8.2, \"fats_g\": 6.6}, {\"multiplier\": 1.0, \"calories\": 405, \"protein_g\": 51.7, \"carbs_g\": 16.3, \"fats_g\": 13.2}, {\"multiplier\": 1.5, \"calories\": 607, \"protein_g\": 77.6, \"carbs_g\": 24.5, \"fats_g\": 19.8}, {\"multiplier\": 2.0, \"calories\": 810, \"protein_g\": 103.4, \"carbs_g\": 32.6, \"fats_g\": 26.4}], \"ingredients\": \"1 tsp sesame oil, 1 tsp oil, 1/4 cup chicken stock, 4 cloves garlic, crushed, 2 tsps ginger, grated, 3 large spring onions, chopped, 1 medium green pepper, sliced, 1/2 cup slices water chestnuts, 1 medium sweet red pepper, sliced, 1 tbsp black beans, rinsed and chopped, 2 tbsps soy sauce, 2 tsps ketchup manis, 1 tsp sugar, 2 lbs sirloin steak, strips, 1 fl oz rice wine, 1/2 oz corn flour (3 tsp)\", \"instructions\": \"Marinate the beef strips for 1 hour in 1 tbsp soy sauce, 2 tsp rice wine, 1/2 tsp sesame oil and 1 tsp cornflour. Heat 2 tablespoons of oil to almost smoking in a wok. Add the beef and brown – remove. Add another tablespoon of oil to wok and heat. Stir fry the spring onion, garlic, black beans and ginger for 20 seconds. Add the peppers and water chestnuts and stir fry another minute. Combine the remaining soy, wine, cornflour and sesame oil and ketcup manis, sugar and stockand simmer until thickened. Add the beef and toss lightly in the sauce until cooked through.\"}, {\"recipe_id\": \"rec_fs_69326965\", \"recipe_name\": \"Vegetarian Pesto Pasta\", \"ready_in_minutes\": 25, \"diet_tags\": [\"vegetarian\"], \"base_calories\": 647, \"base_protein_g\": 34.8, \"base_carbs_g\": 78.9, \"base_fats_g\": 23.0, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 323, \"protein_g\": 17.4, \"carbs_g\": 39.5, \"fats_g\": 11.5}, {\"multiplier\": 1.0, \"calories\": 647, \"protein_g\": 34.8, \"carbs_g\": 78.9, \"fats_g\": 23.0}, {\"multiplier\": 1.5, \"calories\": 970, \"protein_g\": 52.2, \"carbs_g\": 118.4, \"fats_g\": 34.5}, {\"multiplier\": 2.0, \"calories\": 1294, \"protein_g\": 69.6, \"carbs_g\": 157.8, \"fats_g\": 46.0}], \"ingredients\": \"50 g pesto, 2 cups baby spinach, 225 g red lentil pasta, 1/2 cup cooked green peas (from frozen), 1 tbsp olive oil, 1/2 cup cherry tomatoes, 2 cloves garlic\", \"instructions\": \"Boil the pasta as per packet instructions. Reserve some of the pasta water (roughly 1/4 cup), strain the pasta and place it in mixing bowl. Slice the cloves of garlic. In a saucepan over medium heat, heat the olive oil and add the garlic. Cook the garlic for about a minute, or until it is lightly golden. To the pan, add the pesto, pasta, baby spinach, frozen peas, cherry tomatoes and stir to combine. Slowly add a few splashes of the pasta water to allow the pasta to mix easily and combine the ingredients.\"}, {\"recipe_id\": \"rec_fs_78284\", \"recipe_name\": \"Penne Pasta with Beans and Greens\", \"ready_in_minutes\": 30, \"diet_tags\": [\"pasta\"], \"base_calories\": 617, \"base_protein_g\": 36.3, \"base_carbs_g\": 107.0, \"base_fats_g\": 7.2, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 308, \"protein_g\": 18.1, \"carbs_g\": 53.5, \"fats_g\": 3.6}, {\"multiplier\": 1.0, \"calories\": 617, \"protein_g\": 36.3, \"carbs_g\": 107.0, \"fats_g\": 7.2}, {\"multiplier\": 1.5, \"calories\": 925, \"protein_g\": 54.4, \"carbs_g\": 160.5, \"fats_g\": 10.8}, {\"multiplier\": 2.0, \"calories\": 1234, \"protein_g\": 72.6, \"carbs_g\": 214.0, \"fats_g\": 14.4}], \"ingredients\": \"1/4 cup parmesan cheese, 1/2 tsp leaves dried oregano, 1/4 tsp pepper, 1/4 tsp salt, 2 tsps olive oil, 15 3/4 oz chicken broth, 1/2 cup chopped carrots, 1 clove garlic, minced, 1/2 cup chopped onions, 1 package spinach, thawed, 4 oz penne pasta, 14 1/2 oz italian style diced tomatoes, 16 oz white beans\", \"instructions\": \"Heat oil in saucepan, add carrots, onion and garlic, cook 5 minutes. Add oregano, salt, pepper, broth and tomatoes; bring to a boil. Cover, reduce heat and simmer 10 minutes. Increase heat to medium-high; add pasta, beans and spinach; cook 14 minutes, or until pasta is done, stirring occasionally. Sprinkle each serving with parmesan cheese.\"}, {\"recipe_id\": \"rec_fs_14782\", \"recipe_name\": \"Pasta Bolognese\", \"ready_in_minutes\": 30, \"diet_tags\": [\"beef\"], \"base_calories\": 493, \"base_protein_g\": 33.7, \"base_carbs_g\": 75.6, \"base_fats_g\": 8.6, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 246, \"protein_g\": 16.9, \"carbs_g\": 37.8, \"fats_g\": 4.3}, {\"multiplier\": 1.0, \"calories\": 493, \"protein_g\": 33.7, \"carbs_g\": 75.6, \"fats_g\": 8.6}, {\"multiplier\": 1.5, \"calories\": 739, \"protein_g\": 50.6, \"carbs_g\": 113.4, \"fats_g\": 12.9}, {\"multiplier\": 2.0, \"calories\": 986, \"protein_g\": 67.4, \"carbs_g\": 151.2, \"fats_g\": 17.2}], \"ingredients\": \"2 tsps leaves mixed herbs, 2 tsps garlic powder, 1 tbsp worcestershire sauce, 1 large onion, diced, 25 g beef gravy granules, 150 g mushrooms, 15 fl oz boiled water, 400 g chopped tomatoes, 300 g fusilli pasta, 300 g lean ground beef, 80 g cheddar cheese, reduced fat\", \"instructions\": \"For the pasta, add pasta to saucepan of boiling water and simmer until tender. For the bolognese sauce, brown the ground beef, diced onion and chopped mushrooms in another saucepan, stirring until cooked (Don't add any oil or fat as the beef will cook in its own juices). Add can of chopped tomatoes to the beef and then simmer gently to make the bolognese sauce. Stir in a sprinkling of garlic powder and mixed herbs. Add water to the sauce, then stir in 6 heaped teaspoons of beef gravy granules to thicken sauce. To serve, Drain the pasta when tender and return to saucepan.  Pour bolognese sauce over the pasta, then stir until mixed in. Serve immediately, topped with a sprinkling of cheddar cheese if desired. Note: for extra flavor, you could also add some worcestershire sauce to the bolognese sauce.\"}, {\"recipe_id\": \"rec_fs_98421\", \"recipe_name\": \"Breakfast Pizza\", \"ready_in_minutes\": 30, \"diet_tags\": [\"pork\"], \"base_calories\": 286, \"base_protein_g\": 13.9, \"base_carbs_g\": 10.5, \"base_fats_g\": 20.4, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 143, \"protein_g\": 7.0, \"carbs_g\": 5.2, \"fats_g\": 10.2}, {\"multiplier\": 1.0, \"calories\": 286, \"protein_g\": 13.9, \"carbs_g\": 10.5, \"fats_g\": 20.4}, {\"multiplier\": 1.5, \"calories\": 429, \"protein_g\": 20.9, \"carbs_g\": 15.8, \"fats_g\": 30.6}, {\"multiplier\": 2.0, \"calories\": 572, \"protein_g\": 27.8, \"carbs_g\": 21.0, \"fats_g\": 40.8}], \"ingredients\": \"1 cup shredded cheddar cheese, 1 cup hash brown potatoes, 5 large eggs, 1/2 cup grated parmesan cheese, 16 oz pork sausage, 8 crescent rolls dough\", \"instructions\": \"Preheat oven to 375 °F (190 °C) Open crescent roll dough and spread on 12\\\" pizza pan. Be sure to seal any seams and holes. Brown, drain and crumble pork sausage. Thaw frozen hash brown potatoes, and spread over crescent dough. Cover with cheddar cheese. Beat eggs and pour evenly over \\\"pizza\\\". Cover with grated parmesan cheese. Bake for 25-30 minutes.\"}, {\"recipe_id\": \"rec_fs_82722\", \"recipe_name\": \"Trail Mix Sandwich\", \"ready_in_minutes\": 30, \"diet_tags\": [\"vegetarian\"], \"base_calories\": 423, \"base_protein_g\": 14.1, \"base_carbs_g\": 57.5, \"base_fats_g\": 17.2, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 211, \"protein_g\": 7.0, \"carbs_g\": 28.8, \"fats_g\": 8.6}, {\"multiplier\": 1.0, \"calories\": 423, \"protein_g\": 14.1, \"carbs_g\": 57.5, \"fats_g\": 17.2}, {\"multiplier\": 1.5, \"calories\": 634, \"protein_g\": 21.1, \"carbs_g\": 86.2, \"fats_g\": 25.8}, {\"multiplier\": 2.0, \"calories\": 846, \"protein_g\": 28.2, \"carbs_g\": 115.0, \"fats_g\": 34.4}], \"ingredients\": \"1 oz granola, 1/4 small apple, 1/2 small banana, 1 tbsp peanut butter, 2 slices mixed grain bread\", \"instructions\": \"Spread peanut butter on one slice of bread. Thinly slice apple, slice banana and layer on top of your peanut butter. Sprinkle with granola and enjoy.\"}, {\"recipe_id\": \"rec_fs_119766\", \"recipe_name\": \"Vegan Cinnamon Almond Granola Bars\", \"ready_in_minutes\": 30, \"diet_tags\": [\"vegan\"], \"base_calories\": 214, \"base_protein_g\": 5.7, \"base_carbs_g\": 35.0, \"base_fats_g\": 6.5, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 107, \"protein_g\": 2.9, \"carbs_g\": 17.5, \"fats_g\": 3.2}, {\"multiplier\": 1.0, \"calories\": 214, \"protein_g\": 5.7, \"carbs_g\": 35.0, \"fats_g\": 6.5}, {\"multiplier\": 1.5, \"calories\": 321, \"protein_g\": 8.6, \"carbs_g\": 52.5, \"fats_g\": 9.8}, {\"multiplier\": 2.0, \"calories\": 428, \"protein_g\": 11.4, \"carbs_g\": 70.0, \"fats_g\": 13.0}], \"ingredients\": \"1/3 cup flax seeds, 5 tbsp agave nectar, 2 1/4 cups rolled oats, 2 1/2 tsps cinnamon, 1/2 cup raisins, 1/3 cup, slivered almonds\", \"instructions\": \"Combine all ingredients except dried fruit. Spread evenly on to a large baking sheet. Bake at 350 °F (175 °C) for 15 minutes, stirring mixture every 5 minutes. Note: you can add any other dried fruit like cranberries or dates, if you decide to modify.\"}], \"snack_options\": [{\"recipe_id\": \"rec_fs_175424\", \"recipe_name\": \"Meat Sauce\", \"ready_in_minutes\": 30, \"diet_tags\": [\"pasta\"], \"base_calories\": 108, \"base_protein_g\": 13.7, \"base_carbs_g\": 7.3, \"base_fats_g\": 2.7, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 54, \"protein_g\": 6.8, \"carbs_g\": 3.6, \"fats_g\": 1.4}, {\"multiplier\": 1.0, \"calories\": 108, \"protein_g\": 13.7, \"carbs_g\": 7.3, \"fats_g\": 2.7}, {\"multiplier\": 1.5, \"calories\": 162, \"protein_g\": 20.5, \"carbs_g\": 10.9, \"fats_g\": 4.1}, {\"multiplier\": 2.0, \"calories\": 216, \"protein_g\": 27.4, \"carbs_g\": 14.6, \"fats_g\": 5.4}], \"ingredients\": \"1 1/2 tsps sugar, 32 oz ground venison, 1 tbsp dried garlic flakes, 1 tbsp onion powder, 4 tsps ground oregano, 1 tbsp pepper, 1 tsp salt, 3 cups pasta sauce, 1 fl oz lemon juice, 1 cup chopped celery\", \"instructions\": \"Brown venison and add seasonings while browning. Add sauce and celery. Let simmer and season to taste.\"}, {\"recipe_id\": \"rec_fs_645\", \"recipe_name\": \"Sausage Cheese Balls\", \"ready_in_minutes\": 30, \"diet_tags\": [\"pork\"], \"base_calories\": 183, \"base_protein_g\": 9.7, \"base_carbs_g\": 0.1, \"base_fats_g\": 15.8, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 91, \"protein_g\": 4.8, \"carbs_g\": 0.1, \"fats_g\": 7.9}, {\"multiplier\": 1.0, \"calories\": 183, \"protein_g\": 9.7, \"carbs_g\": 0.1, \"fats_g\": 15.8}, {\"multiplier\": 1.5, \"calories\": 274, \"protein_g\": 14.5, \"carbs_g\": 0.2, \"fats_g\": 23.7}, {\"multiplier\": 2.0, \"calories\": 366, \"protein_g\": 19.4, \"carbs_g\": 0.2, \"fats_g\": 31.6}], \"ingredients\": \"1 cup shredded cheddar cheese, 16 oz pork sausage\", \"instructions\": \"Preheat oven to 400 °F (200 °C). With hands, combine sausage and cheese. Bake in oven until browned. Note: serving size will change depending on how big you make the balls.\"}, {\"recipe_id\": \"rec_fs_98421\", \"recipe_name\": \"Breakfast Pizza\", \"ready_in_minutes\": 30, \"diet_tags\": [\"pork\"], \"base_calories\": 286, \"base_protein_g\": 13.9, \"base_carbs_g\": 10.5, \"base_fats_g\": 20.4, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 143, \"protein_g\": 7.0, \"carbs_g\": 5.2, \"fats_g\": 10.2}, {\"multiplier\": 1.0, \"calories\": 286, \"protein_g\": 13.9, \"carbs_g\": 10.5, \"fats_g\": 20.4}, {\"multiplier\": 1.5, \"calories\": 429, \"protein_g\": 20.9, \"carbs_g\": 15.8, \"fats_g\": 30.6}, {\"multiplier\": 2.0, \"calories\": 572, \"protein_g\": 27.8, \"carbs_g\": 21.0, \"fats_g\": 40.8}], \"ingredients\": \"1 cup shredded cheddar cheese, 1 cup hash brown potatoes, 5 large eggs, 1/2 cup grated parmesan cheese, 16 oz pork sausage, 8 crescent rolls dough\", \"instructions\": \"Preheat oven to 375 °F (190 °C) Open crescent roll dough and spread on 12\\\" pizza pan. Be sure to seal any seams and holes. Brown, drain and crumble pork sausage. Thaw frozen hash brown potatoes, and spread over crescent dough. Cover with cheddar cheese. Beat eggs and pour evenly over \\\"pizza\\\". Cover with grated parmesan cheese. Bake for 25-30 minutes.\"}, {\"recipe_id\": \"rec_fs_119766\", \"recipe_name\": \"Vegan Cinnamon Almond Granola Bars\", \"ready_in_minutes\": 30, \"diet_tags\": [\"vegan\"], \"base_calories\": 214, \"base_protein_g\": 5.7, \"base_carbs_g\": 35.0, \"base_fats_g\": 6.5, \"portion_options\": [{\"multiplier\": 0.5, \"calories\": 107, \"protein_g\": 2.9, \"carbs_g\": 17.5, \"fats_g\": 3.2}, {\"multiplier\": 1.0, \"calories\": 214, \"protein_g\": 5.7, \"carbs_g\": 35.0, \"fats_g\": 6.5}, {\"multiplier\": 1.5, \"calories\": 321, \"protein_g\": 8.6, \"carbs_g\": 52.5, \"fats_g\": 9.8}, {\"multiplier\": 2.0, \"calories\": 428, \"protein_g\": 11.4, \"carbs_g\": 70.0, \"fats_g\": 13.0}], \"ingredients\": \"1/3 cup flax seeds, 5 tbsp agave nectar, 2 1/4 cups rolled oats, 2 1/2 tsps cinnamon, 1/2 cup raisins, 1/3 cup, slivered almonds\", \"instructions\": \"Combine all ingredients except dried fruit. Spread evenly on to a large baking sheet. Bake at 350 °F (175 °C) for 15 minutes, stirring mixture every 5 minutes. Note: you can add any other dried fruit like cranberries or dates, if you decide to modify.\"}], \"workout_options\": [{\"exercise_id\": \"ex_gh_862\", \"name\": \"Wide Stance Stiff Legs\", \"target_muscle\": \"hamstrings\", \"equipment\": \"barbell\", \"estimated_met\": 6.0, \"instructions\": \"Begin with a barbell loaded on the floor. Adopt a wide stance, and then bend at the hips to grab the bar. Your hips should be as far back as possible, and your legs nearly straight. Keep your back straight, and your head and chest up. This will be your starting position. Begin the movement be engaging the hips, driving them forward as you allow the arms to hang straight. Continue until you are standing straight up, and then slowly return the weight to the starting position. For successive reps, the weight need not touch the floor.\"}, {\"exercise_id\": \"ex_gh_608\", \"name\": \"Rope Straight-Arm Pulldown\", \"target_muscle\": \"lats\", \"equipment\": \"cable\", \"estimated_met\": 6.0, \"instructions\": \"Attach a rope to a high pulley and make your weight selection. Stand a couple feet back from the pulley with your feet staggered and take the rope with both hands. Lean forward from the hip, keeping your back straight, with your arms extended up in front of you. This will be your starting position. Keeping your arms straight, extend the shoulder to pull the rope down to your thighs. Pause at the bottom of the motion, squeezing your lats. Return to the starting position without allowing the weight to fully rest on the stack.\"}, {\"exercise_id\": \"ex_gh_242\", \"name\": \"Dumbbell Seated One-Leg Calf Raise\", \"target_muscle\": \"calves\", \"equipment\": \"dumbbell\", \"estimated_met\": 6.0, \"instructions\": \"Place a block on the floor about 12 inches from a flat bench. Sit on a flat bench and place a dumbbell on your upper left thigh about 3 inches above your knee. Now place the ball of your left foot on the block. This will be your starting position. Raise your toes up as high as possible as you exhale and you contract your calf muscle. Hold the contraction for a second. Slowly return to the starting position, stretching as far down as possible. Repeat for your prescribed number of repetitions and then repeat with the right leg.\"}, {\"exercise_id\": \"ex_gh_122\", \"name\": \"Cable Preacher Curl\", \"target_muscle\": \"biceps\", \"equipment\": \"cable\", \"estimated_met\": 6.0, \"instructions\": \"Place a preacher bench about 2 feet in front of a pulley machine. Attach a straight bar to the low pulley. Sit at the preacher bench with your elbow and upper arms firmly on top of the bench pad and have someone hand you the bar from the low pulley. Grab the bar and fully extend your arms on top of the preacher bench pad. This will be your starting position. Now start pilling the weight up towards your shoulders and squeeze the biceps hard at the top of the movement. Exhale as you perform this motion. Also, hold for a second at the top. Now slowly lower the weight to the starting position. Repeat for the recommended amount of repetitions.\"}, {\"exercise_id\": \"ex_gh_456\", \"name\": \"Machine Bicep Curl\", \"target_muscle\": \"biceps\", \"equipment\": \"machine\", \"estimated_met\": 6.0, \"instructions\": \"Adjust the seat to the appropriate height and make your weight selection. Place your upper arms against the pads and grasp the handles. This will be your starting position. Perform the movement by flexing the elbow, pulling your lower arm towards your upper arm. Pause at the top of the movement, and then slowly return the weight to the starting position. Avoid returning the weight all the way to the stops until the set is complete to keep tension on the muscles being worked.\"}, {\"exercise_id\": \"ex_gh_293\", \"name\": \"Front Raise And Pullover\", \"target_muscle\": \"chest\", \"equipment\": \"barbell\", \"estimated_met\": 6.0, \"instructions\": \"Lie on a flat bench while holding a barbell using a palms down grip that is about 15 inches apart. Place the bar on your upper thighs, extend your arms and lock them while keeping a slight bend on the elbows. This will be your starting position. Now raise the weight using a semicircular motion and keeping your arms straight as you inhale. Continue the same movement until the bar is on the other side above your head . (Tip: the bar will travel approximately 180-degrees). At this point your arms should be parallel to the floor with the palms of your hands facing the ceiling. Now return the barbell to the starting position by reversing the motion as you exhale. Repeat for the recommended amount of repetitions.\"}, {\"exercise_id\": \"ex_gh_586\", \"name\": \"Reverse Cable Curl\", \"target_muscle\": \"biceps\", \"equipment\": \"cable\", \"estimated_met\": 6.0, \"instructions\": \"Stand up with your torso upright while holding a bar attachment that is attached to a low pulley using a pronated (palms down) and shoulder width grip. Make sure also that you keep the elbows close to the torso. This will be your starting position. While holding the upper arms stationary, curl the weights while contracting the biceps as you breathe out. Only the forearms should move. Continue the movement until your biceps are fully contracted and the bar is at shoulder level. Hold the contracted position for a second as you squeeze the muscle. Slowly begin to bring the bar back to starting position as your breathe in. Repeat for the recommended amount of repetitions.\"}, {\"exercise_id\": \"ex_gh_850\", \"name\": \"Weighted Pull Ups\", \"target_muscle\": \"lats\", \"equipment\": \"other\", \"estimated_met\": 6.0, \"instructions\": \"Attach a weight to a dip belt and secure it around your waist. Grab the pull-up bar with the palms of your hands facing forward. For a medium grip, your hands should be spaced at shoulder width. Both arms should be extended in front of you holding the bar at the chosen grip. You'll want to bring your torso back about 30 degrees while creating a curvature in your lower back and sticking your chest out. This will be your starting position. Now, exhale and pull your torso up until your head is above your hands. Concentrate on squeezing yourshoulder blades back and down as you reach the top contracted position. After a brief moment at the top contracted position, inhale and slowly lower your torso back to the starting position with your arms extended and your lats fully stretched.\"}, {\"exercise_id\": \"ex_gh_538\", \"name\": \"Plank\", \"target_muscle\": \"abdominals\", \"equipment\": \"body only\", \"estimated_met\": 4.0, \"instructions\": \"Get into a prone position on the floor, supporting your weight on your toes and your forearms. Your arms are bent and directly below the shoulder. Keep your body straight at all times, and hold this position as long as possible. To increase difficulty, an arm or leg can be raised.\"}, {\"exercise_id\": \"ex_gh_45\", \"name\": \"Barbell Curls Lying Against An Incline\", \"target_muscle\": \"biceps\", \"equipment\": \"barbell\", \"estimated_met\": 6.0, \"instructions\": \"Lie against an incline bench, with your arms holding a barbell and hanging down in a horizontal line. This will be your starting position. While keeping the upper arms stationary, curl the weight up as high as you can while squeezing the biceps. Breathe out as you perform this portion of the movement. Tip: Only the forearms should move. Do not swing the arms. After a second contraction, slowly go back to the starting position as you inhale. Tip: Make sure that you go all of the way down. Repeat for the recommended amount of repetitions.\"}], \"weekly_calendar\": [{\"day\": \"Monday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [0], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [5], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [2], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [1], \"portion_multipliers\": [1.5]}], \"workout\": {\"exercise_indices\": [0, 1, 2, 3], \"focus\": \"Legs\", \"duration_min\": 45}, \"notes\": \"Stay hydrated and ensure proper form during workouts.\", \"daily_totals\": {\"calories\": 2395, \"protein_g\": 171.5, \"carbs_g\": 218.1, \"fats_g\": 94.6}}, {\"day\": \"Tuesday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [4], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [1], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [2], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [3], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}], \"workout\": {\"exercise_indices\": [4, 5, 6, 7], \"focus\": \"Upper Body\", \"duration_min\": 45}, \"notes\": \"Incorporate stretching to improve flexibility.\", \"daily_totals\": {\"calories\": 2013, \"protein_g\": 135.4, \"carbs_g\": 222.4, \"fats_g\": 66.7}}, {\"day\": \"Wednesday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [1], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [2], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [3], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [5], \"portion_multipliers\": [1.5]}], \"workout\": {\"exercise_indices\": [0, 1, 2, 3], \"focus\": \"Legs\", \"duration_min\": 45}, \"notes\": \"Focus on progressive overload in your workouts.\", \"daily_totals\": {\"calories\": 2492, \"protein_g\": 134.7, \"carbs_g\": 298.0, \"fats_g\": 92.0}}, {\"day\": \"Thursday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [4], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [1], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [2], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [3], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}], \"workout\": {\"exercise_indices\": [4, 5, 6, 7], \"focus\": \"Upper Body\", \"duration_min\": 45}, \"notes\": \"Ensure adequate rest between sets.\", \"daily_totals\": {\"calories\": 2013, \"protein_g\": 135.4, \"carbs_g\": 222.4, \"fats_g\": 66.7}}, {\"day\": \"Friday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [1], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [2], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [3], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [5], \"portion_multipliers\": [1.5]}], \"workout\": {\"exercise_indices\": [0, 1, 2, 3], \"focus\": \"Legs\", \"duration_min\": 45}, \"notes\": \"Consider adding a cool-down routine after workouts.\", \"daily_totals\": {\"calories\": 2492, \"protein_g\": 134.7, \"carbs_g\": 298.0, \"fats_g\": 92.0}}, {\"day\": \"Saturday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [4], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [1], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [2], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [3], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}], \"workout\": {\"exercise_indices\": [4, 5, 6, 7], \"focus\": \"Upper Body\", \"duration_min\": 45}, \"notes\": \"Listen to your body and adjust intensity as needed.\", \"daily_totals\": {\"calories\": 2013, \"protein_g\": 135.4, \"carbs_g\": 222.4, \"fats_g\": 66.7}}, {\"day\": \"Sunday\", \"meals\": [{\"meal_type\": \"Breakfast\", \"recipe_indices\": [1], \"portion_multipliers\": [1.5]}, {\"meal_type\": \"Morning Snack\", \"recipe_indices\": [2], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Lunch\", \"recipe_indices\": [3], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Afternoon Snack\", \"recipe_indices\": [0], \"portion_multipliers\": [1.0]}, {\"meal_type\": \"Dinner\", \"recipe_indices\": [5], \"portion_multipliers\": [1.5]}], \"workout\": {\"exercise_indices\": [0, 1, 2, 3], \"focus\": \"Legs\", \"duration_min\": 45}, \"notes\": \"Prepare for the upcoming week by planning meals.\", \"daily_totals\": {\"calories\": 2492, \"protein_g\": 134.7, \"carbs_g\": 298.0, \"fats_g\": 92.0}}], \"ai_recommendations\": {\"main_tip\": \"Focus on consuming protein-rich foods to support muscle recovery and growth.\", \"personalized_notes\": [\"Your activity level is suitable for muscle gain.\", \"Consider varying your workouts to prevent plateaus.\"], \"nutrition_tips\": [\"Eat protein-rich snacks post-workout for recovery.\", \"Incorporate a variety of foods for balanced nutrition.\"], \"workout_tips\": [\"Aim for consistency in your workout routine.\", \"Allow for rest days to promote muscle recovery.\"], \"safety_notes\": [\"Always warm up before workouts and cool down afterward.\"]}}",
+  "plan": {
+    "plan_summary": {
+      "title": "7-Day Muscle Gain Meal and Workout Plan",
+      "goal_detected": "Muscle gain for a moderately active male",
+      "short_summary": "This plan focuses on high-protein meals and balanced snacks to support muscle growth while incorporating strength training workouts.",
+      "focus": "High-protein nutrition and strength training",
+      "difficulty_level": "Intermediate"
+    },
+    "user_profile_summary": {
+      "age": 25,
+      "sex": "male",
+      "weight_kg": 75.0,
+      "height_cm": 178.0,
+      "bmi": 23.67,
+      "activity_level": "moderately_active"
+    },
+    "nutrition_summary": {
+      "avg_daily_calories": 2272,
+      "avg_daily_protein_g": 140.3,
+      "avg_daily_carbs_g": 254.2,
+      "avg_daily_fats_g": 81.5
+    },
+    "macro_bars": [
+      {
+        "label": "Calories",
+        "value": 2272,
+        "unit": "kcal"
+      },
+      {
+        "label": "Protein",
+        "value": 140.3,
+        "unit": "g"
+      },
+      {
+        "label": "Carbs",
+        "value": 254.2,
+        "unit": "g"
+      },
+      {
+        "label": "Fats",
+        "value": 81.5,
+        "unit": "g"
+      }
+    ],
+    "meal_options": [
+      {
+        "recipe_id": "rec_fs_115",
+        "recipe_name": "Beef with Black Bean Sauce",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "beef"
+        ],
+        "base_calories": 405,
+        "base_protein_g": 51.7,
+        "base_carbs_g": 16.3,
+        "base_fats_g": 13.2,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 202,
+            "protein_g": 25.9,
+            "carbs_g": 8.2,
+            "fats_g": 6.6
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 405,
+            "protein_g": 51.7,
+            "carbs_g": 16.3,
+            "fats_g": 13.2
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 607,
+            "protein_g": 77.6,
+            "carbs_g": 24.5,
+            "fats_g": 19.8
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 810,
+            "protein_g": 103.4,
+            "carbs_g": 32.6,
+            "fats_g": 26.4
+          }
+        ],
+        "ingredients": "1 tsp sesame oil, 1 tsp oil, 1/4 cup chicken stock, 4 cloves garlic, crushed, 2 tsps ginger, grated, 3 large spring onions, chopped, 1 medium green pepper, sliced, 1/2 cup slices water chestnuts, 1 medium sweet red pepper, sliced, 1 tbsp black beans, rinsed and chopped, 2 tbsps soy sauce, 2 tsps ketchup manis, 1 tsp sugar, 2 lbs sirloin steak, strips, 1 fl oz rice wine, 1/2 oz corn flour (3 tsp)",
+        "instructions": "Marinate the beef strips for 1 hour in 1 tbsp soy sauce, 2 tsp rice wine, 1/2 tsp sesame oil and 1 tsp cornflour. Heat 2 tablespoons of oil to almost smoking in a wok. Add the beef and brown – remove. Add another tablespoon of oil to wok and heat. Stir fry the spring onion, garlic, black beans and ginger for 20 seconds. Add the peppers and water chestnuts and stir fry another minute. Combine the remaining soy, wine, cornflour and sesame oil and ketcup manis, sugar and stockand simmer until thickened. Add the beef and toss lightly in the sauce until cooked through."
+      },
+      {
+        "recipe_id": "rec_fs_69326965",
+        "recipe_name": "Vegetarian Pesto Pasta",
+        "ready_in_minutes": 25,
+        "diet_tags": [
+          "vegetarian"
+        ],
+        "base_calories": 647,
+        "base_protein_g": 34.8,
+        "base_carbs_g": 78.9,
+        "base_fats_g": 23.0,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 323,
+            "protein_g": 17.4,
+            "carbs_g": 39.5,
+            "fats_g": 11.5
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 647,
+            "protein_g": 34.8,
+            "carbs_g": 78.9,
+            "fats_g": 23.0
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 970,
+            "protein_g": 52.2,
+            "carbs_g": 118.4,
+            "fats_g": 34.5
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 1294,
+            "protein_g": 69.6,
+            "carbs_g": 157.8,
+            "fats_g": 46.0
+          }
+        ],
+        "ingredients": "50 g pesto, 2 cups baby spinach, 225 g red lentil pasta, 1/2 cup cooked green peas (from frozen), 1 tbsp olive oil, 1/2 cup cherry tomatoes, 2 cloves garlic",
+        "instructions": "Boil the pasta as per packet instructions. Reserve some of the pasta water (roughly 1/4 cup), strain the pasta and place it in mixing bowl. Slice the cloves of garlic. In a saucepan over medium heat, heat the olive oil and add the garlic. Cook the garlic for about a minute, or until it is lightly golden. To the pan, add the pesto, pasta, baby spinach, frozen peas, cherry tomatoes and stir to combine. Slowly add a few splashes of the pasta water to allow the pasta to mix easily and combine the ingredients."
+      },
+      {
+        "recipe_id": "rec_fs_78284",
+        "recipe_name": "Penne Pasta with Beans and Greens",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "pasta"
+        ],
+        "base_calories": 617,
+        "base_protein_g": 36.3,
+        "base_carbs_g": 107.0,
+        "base_fats_g": 7.2,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 308,
+            "protein_g": 18.1,
+            "carbs_g": 53.5,
+            "fats_g": 3.6
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 617,
+            "protein_g": 36.3,
+            "carbs_g": 107.0,
+            "fats_g": 7.2
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 925,
+            "protein_g": 54.4,
+            "carbs_g": 160.5,
+            "fats_g": 10.8
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 1234,
+            "protein_g": 72.6,
+            "carbs_g": 214.0,
+            "fats_g": 14.4
+          }
+        ],
+        "ingredients": "1/4 cup parmesan cheese, 1/2 tsp leaves dried oregano, 1/4 tsp pepper, 1/4 tsp salt, 2 tsps olive oil, 15 3/4 oz chicken broth, 1/2 cup chopped carrots, 1 clove garlic, minced, 1/2 cup chopped onions, 1 package spinach, thawed, 4 oz penne pasta, 14 1/2 oz italian style diced tomatoes, 16 oz white beans",
+        "instructions": "Heat oil in saucepan, add carrots, onion and garlic, cook 5 minutes. Add oregano, salt, pepper, broth and tomatoes; bring to a boil. Cover, reduce heat and simmer 10 minutes. Increase heat to medium-high; add pasta, beans and spinach; cook 14 minutes, or until pasta is done, stirring occasionally. Sprinkle each serving with parmesan cheese."
+      },
+      {
+        "recipe_id": "rec_fs_14782",
+        "recipe_name": "Pasta Bolognese",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "beef"
+        ],
+        "base_calories": 493,
+        "base_protein_g": 33.7,
+        "base_carbs_g": 75.6,
+        "base_fats_g": 8.6,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 246,
+            "protein_g": 16.9,
+            "carbs_g": 37.8,
+            "fats_g": 4.3
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 493,
+            "protein_g": 33.7,
+            "carbs_g": 75.6,
+            "fats_g": 8.6
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 739,
+            "protein_g": 50.6,
+            "carbs_g": 113.4,
+            "fats_g": 12.9
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 986,
+            "protein_g": 67.4,
+            "carbs_g": 151.2,
+            "fats_g": 17.2
+          }
+        ],
+        "ingredients": "2 tsps leaves mixed herbs, 2 tsps garlic powder, 1 tbsp worcestershire sauce, 1 large onion, diced, 25 g beef gravy granules, 150 g mushrooms, 15 fl oz boiled water, 400 g chopped tomatoes, 300 g fusilli pasta, 300 g lean ground beef, 80 g cheddar cheese, reduced fat",
+        "instructions": "For the pasta, add pasta to saucepan of boiling water and simmer until tender. For the bolognese sauce, brown the ground beef, diced onion and chopped mushrooms in another saucepan, stirring until cooked (Don't add any oil or fat as the beef will cook in its own juices). Add can of chopped tomatoes to the beef and then simmer gently to make the bolognese sauce. Stir in a sprinkling of garlic powder and mixed herbs. Add water to the sauce, then stir in 6 heaped teaspoons of beef gravy granules to thicken sauce. To serve, Drain the pasta when tender and return to saucepan.  Pour bolognese sauce over the pasta, then stir until mixed in. Serve immediately, topped with a sprinkling of cheddar cheese if desired. Note: for extra flavor, you could also add some worcestershire sauce to the bolognese sauce."
+      },
+      {
+        "recipe_id": "rec_fs_98421",
+        "recipe_name": "Breakfast Pizza",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "pork"
+        ],
+        "base_calories": 286,
+        "base_protein_g": 13.9,
+        "base_carbs_g": 10.5,
+        "base_fats_g": 20.4,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 143,
+            "protein_g": 7.0,
+            "carbs_g": 5.2,
+            "fats_g": 10.2
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 286,
+            "protein_g": 13.9,
+            "carbs_g": 10.5,
+            "fats_g": 20.4
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 429,
+            "protein_g": 20.9,
+            "carbs_g": 15.8,
+            "fats_g": 30.6
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 572,
+            "protein_g": 27.8,
+            "carbs_g": 21.0,
+            "fats_g": 40.8
+          }
+        ],
+        "ingredients": "1 cup shredded cheddar cheese, 1 cup hash brown potatoes, 5 large eggs, 1/2 cup grated parmesan cheese, 16 oz pork sausage, 8 crescent rolls dough",
+        "instructions": "Preheat oven to 375 °F (190 °C) Open crescent roll dough and spread on 12\" pizza pan. Be sure to seal any seams and holes. Brown, drain and crumble pork sausage. Thaw frozen hash brown potatoes, and spread over crescent dough. Cover with cheddar cheese. Beat eggs and pour evenly over \"pizza\". Cover with grated parmesan cheese. Bake for 25-30 minutes."
+      },
+      {
+        "recipe_id": "rec_fs_82722",
+        "recipe_name": "Trail Mix Sandwich",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "vegetarian"
+        ],
+        "base_calories": 423,
+        "base_protein_g": 14.1,
+        "base_carbs_g": 57.5,
+        "base_fats_g": 17.2,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 211,
+            "protein_g": 7.0,
+            "carbs_g": 28.8,
+            "fats_g": 8.6
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 423,
+            "protein_g": 14.1,
+            "carbs_g": 57.5,
+            "fats_g": 17.2
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 634,
+            "protein_g": 21.1,
+            "carbs_g": 86.2,
+            "fats_g": 25.8
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 846,
+            "protein_g": 28.2,
+            "carbs_g": 115.0,
+            "fats_g": 34.4
+          }
+        ],
+        "ingredients": "1 oz granola, 1/4 small apple, 1/2 small banana, 1 tbsp peanut butter, 2 slices mixed grain bread",
+        "instructions": "Spread peanut butter on one slice of bread. Thinly slice apple, slice banana and layer on top of your peanut butter. Sprinkle with granola and enjoy."
+      },
+      {
+        "recipe_id": "rec_fs_119766",
+        "recipe_name": "Vegan Cinnamon Almond Granola Bars",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "vegan"
+        ],
+        "base_calories": 214,
+        "base_protein_g": 5.7,
+        "base_carbs_g": 35.0,
+        "base_fats_g": 6.5,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 107,
+            "protein_g": 2.9,
+            "carbs_g": 17.5,
+            "fats_g": 3.2
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 214,
+            "protein_g": 5.7,
+            "carbs_g": 35.0,
+            "fats_g": 6.5
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 321,
+            "protein_g": 8.6,
+            "carbs_g": 52.5,
+            "fats_g": 9.8
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 428,
+            "protein_g": 11.4,
+            "carbs_g": 70.0,
+            "fats_g": 13.0
+          }
+        ],
+        "ingredients": "1/3 cup flax seeds, 5 tbsp agave nectar, 2 1/4 cups rolled oats, 2 1/2 tsps cinnamon, 1/2 cup raisins, 1/3 cup, slivered almonds",
+        "instructions": "Combine all ingredients except dried fruit. Spread evenly on to a large baking sheet. Bake at 350 °F (175 °C) for 15 minutes, stirring mixture every 5 minutes. Note: you can add any other dried fruit like cranberries or dates, if you decide to modify."
+      }
+    ],
+    "snack_options": [
+      {
+        "recipe_id": "rec_fs_175424",
+        "recipe_name": "Meat Sauce",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "pasta"
+        ],
+        "base_calories": 108,
+        "base_protein_g": 13.7,
+        "base_carbs_g": 7.3,
+        "base_fats_g": 2.7,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 54,
+            "protein_g": 6.8,
+            "carbs_g": 3.6,
+            "fats_g": 1.4
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 108,
+            "protein_g": 13.7,
+            "carbs_g": 7.3,
+            "fats_g": 2.7
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 162,
+            "protein_g": 20.5,
+            "carbs_g": 10.9,
+            "fats_g": 4.1
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 216,
+            "protein_g": 27.4,
+            "carbs_g": 14.6,
+            "fats_g": 5.4
+          }
+        ],
+        "ingredients": "1 1/2 tsps sugar, 32 oz ground venison, 1 tbsp dried garlic flakes, 1 tbsp onion powder, 4 tsps ground oregano, 1 tbsp pepper, 1 tsp salt, 3 cups pasta sauce, 1 fl oz lemon juice, 1 cup chopped celery",
+        "instructions": "Brown venison and add seasonings while browning. Add sauce and celery. Let simmer and season to taste."
+      },
+      {
+        "recipe_id": "rec_fs_645",
+        "recipe_name": "Sausage Cheese Balls",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "pork"
+        ],
+        "base_calories": 183,
+        "base_protein_g": 9.7,
+        "base_carbs_g": 0.1,
+        "base_fats_g": 15.8,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 91,
+            "protein_g": 4.8,
+            "carbs_g": 0.1,
+            "fats_g": 7.9
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 183,
+            "protein_g": 9.7,
+            "carbs_g": 0.1,
+            "fats_g": 15.8
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 274,
+            "protein_g": 14.5,
+            "carbs_g": 0.2,
+            "fats_g": 23.7
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 366,
+            "protein_g": 19.4,
+            "carbs_g": 0.2,
+            "fats_g": 31.6
+          }
+        ],
+        "ingredients": "1 cup shredded cheddar cheese, 16 oz pork sausage",
+        "instructions": "Preheat oven to 400 °F (200 °C). With hands, combine sausage and cheese. Bake in oven until browned. Note: serving size will change depending on how big you make the balls."
+      },
+      {
+        "recipe_id": "rec_fs_98421",
+        "recipe_name": "Breakfast Pizza",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "pork"
+        ],
+        "base_calories": 286,
+        "base_protein_g": 13.9,
+        "base_carbs_g": 10.5,
+        "base_fats_g": 20.4,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 143,
+            "protein_g": 7.0,
+            "carbs_g": 5.2,
+            "fats_g": 10.2
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 286,
+            "protein_g": 13.9,
+            "carbs_g": 10.5,
+            "fats_g": 20.4
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 429,
+            "protein_g": 20.9,
+            "carbs_g": 15.8,
+            "fats_g": 30.6
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 572,
+            "protein_g": 27.8,
+            "carbs_g": 21.0,
+            "fats_g": 40.8
+          }
+        ],
+        "ingredients": "1 cup shredded cheddar cheese, 1 cup hash brown potatoes, 5 large eggs, 1/2 cup grated parmesan cheese, 16 oz pork sausage, 8 crescent rolls dough",
+        "instructions": "Preheat oven to 375 °F (190 °C) Open crescent roll dough and spread on 12\" pizza pan. Be sure to seal any seams and holes. Brown, drain and crumble pork sausage. Thaw frozen hash brown potatoes, and spread over crescent dough. Cover with cheddar cheese. Beat eggs and pour evenly over \"pizza\". Cover with grated parmesan cheese. Bake for 25-30 minutes."
+      },
+      {
+        "recipe_id": "rec_fs_119766",
+        "recipe_name": "Vegan Cinnamon Almond Granola Bars",
+        "ready_in_minutes": 30,
+        "diet_tags": [
+          "vegan"
+        ],
+        "base_calories": 214,
+        "base_protein_g": 5.7,
+        "base_carbs_g": 35.0,
+        "base_fats_g": 6.5,
+        "portion_options": [
+          {
+            "multiplier": 0.5,
+            "calories": 107,
+            "protein_g": 2.9,
+            "carbs_g": 17.5,
+            "fats_g": 3.2
+          },
+          {
+            "multiplier": 1.0,
+            "calories": 214,
+            "protein_g": 5.7,
+            "carbs_g": 35.0,
+            "fats_g": 6.5
+          },
+          {
+            "multiplier": 1.5,
+            "calories": 321,
+            "protein_g": 8.6,
+            "carbs_g": 52.5,
+            "fats_g": 9.8
+          },
+          {
+            "multiplier": 2.0,
+            "calories": 428,
+            "protein_g": 11.4,
+            "carbs_g": 70.0,
+            "fats_g": 13.0
+          }
+        ],
+        "ingredients": "1/3 cup flax seeds, 5 tbsp agave nectar, 2 1/4 cups rolled oats, 2 1/2 tsps cinnamon, 1/2 cup raisins, 1/3 cup, slivered almonds",
+        "instructions": "Combine all ingredients except dried fruit. Spread evenly on to a large baking sheet. Bake at 350 °F (175 °C) for 15 minutes, stirring mixture every 5 minutes. Note: you can add any other dried fruit like cranberries or dates, if you decide to modify."
+      }
+    ],
+    "workout_options": [
+      {
+        "exercise_id": "ex_gh_862",
+        "name": "Wide Stance Stiff Legs",
+        "target_muscle": "hamstrings",
+        "equipment": "barbell",
+        "estimated_met": 6.0,
+        "instructions": "Begin with a barbell loaded on the floor. Adopt a wide stance, and then bend at the hips to grab the bar. Your hips should be as far back as possible, and your legs nearly straight. Keep your back straight, and your head and chest up. This will be your starting position. Begin the movement be engaging the hips, driving them forward as you allow the arms to hang straight. Continue until you are standing straight up, and then slowly return the weight to the starting position. For successive reps, the weight need not touch the floor."
+      },
+      {
+        "exercise_id": "ex_gh_608",
+        "name": "Rope Straight-Arm Pulldown",
+        "target_muscle": "lats",
+        "equipment": "cable",
+        "estimated_met": 6.0,
+        "instructions": "Attach a rope to a high pulley and make your weight selection. Stand a couple feet back from the pulley with your feet staggered and take the rope with both hands. Lean forward from the hip, keeping your back straight, with your arms extended up in front of you. This will be your starting position. Keeping your arms straight, extend the shoulder to pull the rope down to your thighs. Pause at the bottom of the motion, squeezing your lats. Return to the starting position without allowing the weight to fully rest on the stack."
+      },
+      {
+        "exercise_id": "ex_gh_242",
+        "name": "Dumbbell Seated One-Leg Calf Raise",
+        "target_muscle": "calves",
+        "equipment": "dumbbell",
+        "estimated_met": 6.0,
+        "instructions": "Place a block on the floor about 12 inches from a flat bench. Sit on a flat bench and place a dumbbell on your upper left thigh about 3 inches above your knee. Now place the ball of your left foot on the block. This will be your starting position. Raise your toes up as high as possible as you exhale and you contract your calf muscle. Hold the contraction for a second. Slowly return to the starting position, stretching as far down as possible. Repeat for your prescribed number of repetitions and then repeat with the right leg."
+      },
+      {
+        "exercise_id": "ex_gh_122",
+        "name": "Cable Preacher Curl",
+        "target_muscle": "biceps",
+        "equipment": "cable",
+        "estimated_met": 6.0,
+        "instructions": "Place a preacher bench about 2 feet in front of a pulley machine. Attach a straight bar to the low pulley. Sit at the preacher bench with your elbow and upper arms firmly on top of the bench pad and have someone hand you the bar from the low pulley. Grab the bar and fully extend your arms on top of the preacher bench pad. This will be your starting position. Now start pilling the weight up towards your shoulders and squeeze the biceps hard at the top of the movement. Exhale as you perform this motion. Also, hold for a second at the top. Now slowly lower the weight to the starting position. Repeat for the recommended amount of repetitions."
+      },
+      {
+        "exercise_id": "ex_gh_456",
+        "name": "Machine Bicep Curl",
+        "target_muscle": "biceps",
+        "equipment": "machine",
+        "estimated_met": 6.0,
+        "instructions": "Adjust the seat to the appropriate height and make your weight selection. Place your upper arms against the pads and grasp the handles. This will be your starting position. Perform the movement by flexing the elbow, pulling your lower arm towards your upper arm. Pause at the top of the movement, and then slowly return the weight to the starting position. Avoid returning the weight all the way to the stops until the set is complete to keep tension on the muscles being worked."
+      },
+      {
+        "exercise_id": "ex_gh_293",
+        "name": "Front Raise And Pullover",
+        "target_muscle": "chest",
+        "equipment": "barbell",
+        "estimated_met": 6.0,
+        "instructions": "Lie on a flat bench while holding a barbell using a palms down grip that is about 15 inches apart. Place the bar on your upper thighs, extend your arms and lock them while keeping a slight bend on the elbows. This will be your starting position. Now raise the weight using a semicircular motion and keeping your arms straight as you inhale. Continue the same movement until the bar is on the other side above your head . (Tip: the bar will travel approximately 180-degrees). At this point your arms should be parallel to the floor with the palms of your hands facing the ceiling. Now return the barbell to the starting position by reversing the motion as you exhale. Repeat for the recommended amount of repetitions."
+      },
+      {
+        "exercise_id": "ex_gh_586",
+        "name": "Reverse Cable Curl",
+        "target_muscle": "biceps",
+        "equipment": "cable",
+        "estimated_met": 6.0,
+        "instructions": "Stand up with your torso upright while holding a bar attachment that is attached to a low pulley using a pronated (palms down) and shoulder width grip. Make sure also that you keep the elbows close to the torso. This will be your starting position. While holding the upper arms stationary, curl the weights while contracting the biceps as you breathe out. Only the forearms should move. Continue the movement until your biceps are fully contracted and the bar is at shoulder level. Hold the contracted position for a second as you squeeze the muscle. Slowly begin to bring the bar back to starting position as your breathe in. Repeat for the recommended amount of repetitions."
+      },
+      {
+        "exercise_id": "ex_gh_850",
+        "name": "Weighted Pull Ups",
+        "target_muscle": "lats",
+        "equipment": "other",
+        "estimated_met": 6.0,
+        "instructions": "Attach a weight to a dip belt and secure it around your waist. Grab the pull-up bar with the palms of your hands facing forward. For a medium grip, your hands should be spaced at shoulder width. Both arms should be extended in front of you holding the bar at the chosen grip. You'll want to bring your torso back about 30 degrees while creating a curvature in your lower back and sticking your chest out. This will be your starting position. Now, exhale and pull your torso up until your head is above your hands. Concentrate on squeezing yourshoulder blades back and down as you reach the top contracted position. After a brief moment at the top contracted position, inhale and slowly lower your torso back to the starting position with your arms extended and your lats fully stretched."
+      },
+      {
+        "exercise_id": "ex_gh_538",
+        "name": "Plank",
+        "target_muscle": "abdominals",
+        "equipment": "body only",
+        "estimated_met": 4.0,
+        "instructions": "Get into a prone position on the floor, supporting your weight on your toes and your forearms. Your arms are bent and directly below the shoulder. Keep your body straight at all times, and hold this position as long as possible. To increase difficulty, an arm or leg can be raised."
+      },
+      {
+        "exercise_id": "ex_gh_45",
+        "name": "Barbell Curls Lying Against An Incline",
+        "target_muscle": "biceps",
+        "equipment": "barbell",
+        "estimated_met": 6.0,
+        "instructions": "Lie against an incline bench, with your arms holding a barbell and hanging down in a horizontal line. This will be your starting position. While keeping the upper arms stationary, curl the weight up as high as you can while squeezing the biceps. Breathe out as you perform this portion of the movement. Tip: Only the forearms should move. Do not swing the arms. After a second contraction, slowly go back to the starting position as you inhale. Tip: Make sure that you go all of the way down. Repeat for the recommended amount of repetitions."
+      }
+    ],
+    "weekly_calendar": [
+      {
+        "day": "Monday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              5
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "focus": "Legs",
+          "duration_min": 45
+        },
+        "notes": "Stay hydrated and ensure proper form during workouts.",
+        "daily_totals": {
+          "calories": 2395,
+          "protein_g": 171.5,
+          "carbs_g": 218.1,
+          "fats_g": 94.6
+        }
+      },
+      {
+        "day": "Tuesday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              4
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              3
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "focus": "Upper Body",
+          "duration_min": 45
+        },
+        "notes": "Incorporate stretching to improve flexibility.",
+        "daily_totals": {
+          "calories": 2013,
+          "protein_g": 135.4,
+          "carbs_g": 222.4,
+          "fats_g": 66.7
+        }
+      },
+      {
+        "day": "Wednesday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              3
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              5
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "focus": "Legs",
+          "duration_min": 45
+        },
+        "notes": "Focus on progressive overload in your workouts.",
+        "daily_totals": {
+          "calories": 2492,
+          "protein_g": 134.7,
+          "carbs_g": 298.0,
+          "fats_g": 92.0
+        }
+      },
+      {
+        "day": "Thursday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              4
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              3
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "focus": "Upper Body",
+          "duration_min": 45
+        },
+        "notes": "Ensure adequate rest between sets.",
+        "daily_totals": {
+          "calories": 2013,
+          "protein_g": 135.4,
+          "carbs_g": 222.4,
+          "fats_g": 66.7
+        }
+      },
+      {
+        "day": "Friday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              3
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              5
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "focus": "Legs",
+          "duration_min": 45
+        },
+        "notes": "Consider adding a cool-down routine after workouts.",
+        "daily_totals": {
+          "calories": 2492,
+          "protein_g": 134.7,
+          "carbs_g": 298.0,
+          "fats_g": 92.0
+        }
+      },
+      {
+        "day": "Saturday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              4
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              3
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "focus": "Upper Body",
+          "duration_min": 45
+        },
+        "notes": "Listen to your body and adjust intensity as needed.",
+        "daily_totals": {
+          "calories": 2013,
+          "protein_g": 135.4,
+          "carbs_g": 222.4,
+          "fats_g": 66.7
+        }
+      },
+      {
+        "day": "Sunday",
+        "meals": [
+          {
+            "meal_type": "Breakfast",
+            "recipe_indices": [
+              1
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          },
+          {
+            "meal_type": "Morning Snack",
+            "recipe_indices": [
+              2
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Lunch",
+            "recipe_indices": [
+              3
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Afternoon Snack",
+            "recipe_indices": [
+              0
+            ],
+            "portion_multipliers": [
+              1.0
+            ]
+          },
+          {
+            "meal_type": "Dinner",
+            "recipe_indices": [
+              5
+            ],
+            "portion_multipliers": [
+              1.5
+            ]
+          }
+        ],
+        "workout": {
+          "exercise_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "focus": "Legs",
+          "duration_min": 45
+        },
+        "notes": "Prepare for the upcoming week by planning meals.",
+        "daily_totals": {
+          "calories": 2492,
+          "protein_g": 134.7,
+          "carbs_g": 298.0,
+          "fats_g": 92.0
+        }
+      }
+    ],
+    "ai_recommendations": {
+      "main_tip": "Focus on consuming protein-rich foods to support muscle recovery and growth.",
+      "personalized_notes": [
+        "Your activity level is suitable for muscle gain.",
+        "Consider varying your workouts to prevent plateaus."
+      ],
+      "nutrition_tips": [
+        "Eat protein-rich snacks post-workout for recovery.",
+        "Incorporate a variety of foods for balanced nutrition."
+      ],
+      "workout_tips": [
+        "Aim for consistency in your workout routine.",
+        "Allow for rest days to promote muscle recovery."
+      ],
+      "safety_notes": [
+        "Always warm up before workouts and cool down afterward."
+      ]
+    }
+  },
+  "raw_data": {
+    "exercises": [
+      {
+        "id": "ex_gh_862",
+        "name": "Wide Stance Stiff Legs",
+        "target_muscle": "hamstrings",
+        "secondary_muscles": [
+          "adductors",
+          "glutes",
+          "lower back"
+        ],
+        "body_parts": [],
+        "equipment": "barbell",
+        "estimated_met": 6.0,
+        "instructions": "Begin with a barbell loaded on the floor. Adopt a wide stance, and then bend at the hips to grab the bar. Your hips should be as far back as possible, and your legs nearly straight. Keep your back straight, and your head and chest up. This will be your starting position. Begin the movement be engaging the hips, driving them forward as you allow the arms to hang straight. Continue until you are standing straight up, and then slowly return the weight to the starting position. For successive reps, the weight need not touch the floor.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_862\", \"name\": \"Wide Stance Stiff Legs\", \"target_muscle\": \"hamstrings\", \"secondary_muscles\": [\"adductors\", \"glutes\", \"lower back\"], \"body_parts\": [], \"equipment\": \"barbell\", \"estimated_met\": 6.0, \"instructions\": \"Begin with a barbell loaded on the floor. Adopt a wide stance, and then bend at the hips to grab the bar. Your hips should be as far back as possible, and your legs nearly straight. Keep your back straight, and your head and chest up. This will be your starting position. Begin the movement be engaging the hips, driving them forward as you allow the arms to hang straight. Continue until you are standing straight up, and then slowly return the weight to the starting position. For successive reps, the weight need not touch the floor.\", \"gif_url\": \"\"}",
+        "_score": 0.7582338
+      },
+      {
+        "id": "ex_gh_608",
+        "name": "Rope Straight-Arm Pulldown",
+        "target_muscle": "lats",
+        "secondary_muscles": [],
+        "body_parts": [],
+        "equipment": "cable",
+        "estimated_met": 6.0,
+        "instructions": "Attach a rope to a high pulley and make your weight selection. Stand a couple feet back from the pulley with your feet staggered and take the rope with both hands. Lean forward from the hip, keeping your back straight, with your arms extended up in front of you. This will be your starting position. Keeping your arms straight, extend the shoulder to pull the rope down to your thighs. Pause at the bottom of the motion, squeezing your lats. Return to the starting position without allowing the weight to fully rest on the stack.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_608\", \"name\": \"Rope Straight-Arm Pulldown\", \"target_muscle\": \"lats\", \"secondary_muscles\": [], \"body_parts\": [], \"equipment\": \"cable\", \"estimated_met\": 6.0, \"instructions\": \"Attach a rope to a high pulley and make your weight selection. Stand a couple feet back from the pulley with your feet staggered and take the rope with both hands. Lean forward from the hip, keeping your back straight, with your arms extended up in front of you. This will be your starting position. Keeping your arms straight, extend the shoulder to pull the rope down to your thighs. Pause at the bottom of the motion, squeezing your lats. Return to the starting position without allowing the weight to fully rest on the stack.\", \"gif_url\": \"\"}",
+        "_score": 0.7486899
+      },
+      {
+        "id": "ex_gh_242",
+        "name": "Dumbbell Seated One-Leg Calf Raise",
+        "target_muscle": "calves",
+        "secondary_muscles": [],
+        "body_parts": [],
+        "equipment": "dumbbell",
+        "estimated_met": 6.0,
+        "instructions": "Place a block on the floor about 12 inches from a flat bench. Sit on a flat bench and place a dumbbell on your upper left thigh about 3 inches above your knee. Now place the ball of your left foot on the block. This will be your starting position. Raise your toes up as high as possible as you exhale and you contract your calf muscle. Hold the contraction for a second. Slowly return to the starting position, stretching as far down as possible. Repeat for your prescribed number of repetitions and then repeat with the right leg.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_242\", \"name\": \"Dumbbell Seated One-Leg Calf Raise\", \"target_muscle\": \"calves\", \"secondary_muscles\": [], \"body_parts\": [], \"equipment\": \"dumbbell\", \"estimated_met\": 6.0, \"instructions\": \"Place a block on the floor about 12 inches from a flat bench. Sit on a flat bench and place a dumbbell on your upper left thigh about 3 inches above your knee. Now place the ball of your left foot on the block. This will be your starting position. Raise your toes up as high as possible as you exhale and you contract your calf muscle. Hold the contraction for a second. Slowly return to the starting position, stretching as far down as possible. Repeat for your prescribed number of repetitions and then repeat with the right leg.\", \"gif_url\": \"\"}",
+        "_score": 0.7464808
+      },
+      {
+        "id": "ex_gh_122",
+        "name": "Cable Preacher Curl",
+        "target_muscle": "biceps",
+        "secondary_muscles": [
+          "forearms"
+        ],
+        "body_parts": [],
+        "equipment": "cable",
+        "estimated_met": 6.0,
+        "instructions": "Place a preacher bench about 2 feet in front of a pulley machine. Attach a straight bar to the low pulley. Sit at the preacher bench with your elbow and upper arms firmly on top of the bench pad and have someone hand you the bar from the low pulley. Grab the bar and fully extend your arms on top of the preacher bench pad. This will be your starting position. Now start pilling the weight up towards your shoulders and squeeze the biceps hard at the top of the movement. Exhale as you perform this motion. Also, hold for a second at the top. Now slowly lower the weight to the starting position. Repeat for the recommended amount of repetitions.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_122\", \"name\": \"Cable Preacher Curl\", \"target_muscle\": \"biceps\", \"secondary_muscles\": [\"forearms\"], \"body_parts\": [], \"equipment\": \"cable\", \"estimated_met\": 6.0, \"instructions\": \"Place a preacher bench about 2 feet in front of a pulley machine. Attach a straight bar to the low pulley. Sit at the preacher bench with your elbow and upper arms firmly on top of the bench pad and have someone hand you the bar from the low pulley. Grab the bar and fully extend your arms on top of the preacher bench pad. This will be your starting position. Now start pilling the weight up towards your shoulders and squeeze the biceps hard at the top of the movement. Exhale as you perform this motion. Also, hold for a second at the top. Now slowly lower the weight to the starting position. Repeat for the recommended amount of repetitions.\", \"gif_url\": \"\"}",
+        "_score": 0.7464187
+      },
+      {
+        "id": "ex_gh_456",
+        "name": "Machine Bicep Curl",
+        "target_muscle": "biceps",
+        "secondary_muscles": [],
+        "body_parts": [],
+        "equipment": "machine",
+        "estimated_met": 6.0,
+        "instructions": "Adjust the seat to the appropriate height and make your weight selection. Place your upper arms against the pads and grasp the handles. This will be your starting position. Perform the movement by flexing the elbow, pulling your lower arm towards your upper arm. Pause at the top of the movement, and then slowly return the weight to the starting position. Avoid returning the weight all the way to the stops until the set is complete to keep tension on the muscles being worked.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_456\", \"name\": \"Machine Bicep Curl\", \"target_muscle\": \"biceps\", \"secondary_muscles\": [], \"body_parts\": [], \"equipment\": \"machine\", \"estimated_met\": 6.0, \"instructions\": \"Adjust the seat to the appropriate height and make your weight selection. Place your upper arms against the pads and grasp the handles. This will be your starting position. Perform the movement by flexing the elbow, pulling your lower arm towards your upper arm. Pause at the top of the movement, and then slowly return the weight to the starting position. Avoid returning the weight all the way to the stops until the set is complete to keep tension on the muscles being worked.\", \"gif_url\": \"\"}",
+        "_score": 0.7453147
+      },
+      {
+        "id": "ex_gh_293",
+        "name": "Front Raise And Pullover",
+        "target_muscle": "chest",
+        "secondary_muscles": [
+          "lats",
+          "shoulders",
+          "triceps"
+        ],
+        "body_parts": [],
+        "equipment": "barbell",
+        "estimated_met": 6.0,
+        "instructions": "Lie on a flat bench while holding a barbell using a palms down grip that is about 15 inches apart. Place the bar on your upper thighs, extend your arms and lock them while keeping a slight bend on the elbows. This will be your starting position. Now raise the weight using a semicircular motion and keeping your arms straight as you inhale. Continue the same movement until the bar is on the other side above your head . (Tip: the bar will travel approximately 180-degrees). At this point your arms should be parallel to the floor with the palms of your hands facing the ceiling. Now return the barbell to the starting position by reversing the motion as you exhale. Repeat for the recommended amount of repetitions.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_293\", \"name\": \"Front Raise And Pullover\", \"target_muscle\": \"chest\", \"secondary_muscles\": [\"lats\", \"shoulders\", \"triceps\"], \"body_parts\": [], \"equipment\": \"barbell\", \"estimated_met\": 6.0, \"instructions\": \"Lie on a flat bench while holding a barbell using a palms down grip that is about 15 inches apart. Place the bar on your upper thighs, extend your arms and lock them while keeping a slight bend on the elbows. This will be your starting position. Now raise the weight using a semicircular motion and keeping your arms straight as you inhale. Continue the same movement until the bar is on the other side above your head . (Tip: the bar will travel approximately 180-degrees). At this point your arms should be parallel to the floor with the palms of your hands facing the ceiling. Now return the barbell to the starting position by reversing the motion as you exhale. Repeat for the recommended amount of repetitions.\", \"gif_url\": \"\"}",
+        "_score": 0.7448704
+      },
+      {
+        "id": "ex_gh_586",
+        "name": "Reverse Cable Curl",
+        "target_muscle": "biceps",
+        "secondary_muscles": [
+          "forearms"
+        ],
+        "body_parts": [],
+        "equipment": "cable",
+        "estimated_met": 6.0,
+        "instructions": "Stand up with your torso upright while holding a bar attachment that is attached to a low pulley using a pronated (palms down) and shoulder width grip. Make sure also that you keep the elbows close to the torso. This will be your starting position. While holding the upper arms stationary, curl the weights while contracting the biceps as you breathe out. Only the forearms should move. Continue the movement until your biceps are fully contracted and the bar is at shoulder level. Hold the contracted position for a second as you squeeze the muscle. Slowly begin to bring the bar back to starting position as your breathe in. Repeat for the recommended amount of repetitions.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_586\", \"name\": \"Reverse Cable Curl\", \"target_muscle\": \"biceps\", \"secondary_muscles\": [\"forearms\"], \"body_parts\": [], \"equipment\": \"cable\", \"estimated_met\": 6.0, \"instructions\": \"Stand up with your torso upright while holding a bar attachment that is attached to a low pulley using a pronated (palms down) and shoulder width grip. Make sure also that you keep the elbows close to the torso. This will be your starting position. While holding the upper arms stationary, curl the weights while contracting the biceps as you breathe out. Only the forearms should move. Continue the movement until your biceps are fully contracted and the bar is at shoulder level. Hold the contracted position for a second as you squeeze the muscle. Slowly begin to bring the bar back to starting position as your breathe in. Repeat for the recommended amount of repetitions.\", \"gif_url\": \"\"}",
+        "_score": 0.7426528
+      },
+      {
+        "id": "ex_gh_850",
+        "name": "Weighted Pull Ups",
+        "target_muscle": "lats",
+        "secondary_muscles": [
+          "biceps",
+          "middle back"
+        ],
+        "body_parts": [],
+        "equipment": "other",
+        "estimated_met": 6.0,
+        "instructions": "Attach a weight to a dip belt and secure it around your waist. Grab the pull-up bar with the palms of your hands facing forward. For a medium grip, your hands should be spaced at shoulder width. Both arms should be extended in front of you holding the bar at the chosen grip. You'll want to bring your torso back about 30 degrees while creating a curvature in your lower back and sticking your chest out. This will be your starting position. Now, exhale and pull your torso up until your head is above your hands. Concentrate on squeezing yourshoulder blades back and down as you reach the top contracted position. After a brief moment at the top contracted position, inhale and slowly lower your torso back to the starting position with your arms extended and your lats fully stretched.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_850\", \"name\": \"Weighted Pull Ups\", \"target_muscle\": \"lats\", \"secondary_muscles\": [\"biceps\", \"middle back\"], \"body_parts\": [], \"equipment\": \"other\", \"estimated_met\": 6.0, \"instructions\": \"Attach a weight to a dip belt and secure it around your waist. Grab the pull-up bar with the palms of your hands facing forward. For a medium grip, your hands should be spaced at shoulder width. Both arms should be extended in front of you holding the bar at the chosen grip. You'll want to bring your torso back about 30 degrees while creating a curvature in your lower back and sticking your chest out. This will be your starting position. Now, exhale and pull your torso up until your head is above your hands. Concentrate on squeezing yourshoulder blades back and down as you reach the top contracted position. After a brief moment at the top contracted position, inhale and slowly lower your torso back to the starting position with your arms extended and your lats fully stretched.\", \"gif_url\": \"\"}",
+        "_score": 0.74255556
+      },
+      {
+        "id": "ex_gh_538",
+        "name": "Plank",
+        "target_muscle": "abdominals",
+        "secondary_muscles": [],
+        "body_parts": [],
+        "equipment": "body only",
+        "estimated_met": 4.0,
+        "instructions": "Get into a prone position on the floor, supporting your weight on your toes and your forearms. Your arms are bent and directly below the shoulder. Keep your body straight at all times, and hold this position as long as possible. To increase difficulty, an arm or leg can be raised.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_538\", \"name\": \"Plank\", \"target_muscle\": \"abdominals\", \"secondary_muscles\": [], \"body_parts\": [], \"equipment\": \"body only\", \"estimated_met\": 4.0, \"instructions\": \"Get into a prone position on the floor, supporting your weight on your toes and your forearms. Your arms are bent and directly below the shoulder. Keep your body straight at all times, and hold this position as long as possible. To increase difficulty, an arm or leg can be raised.\", \"gif_url\": \"\"}",
+        "_score": 0.7413683
+      },
+      {
+        "id": "ex_gh_45",
+        "name": "Barbell Curls Lying Against An Incline",
+        "target_muscle": "biceps",
+        "secondary_muscles": [],
+        "body_parts": [],
+        "equipment": "barbell",
+        "estimated_met": 6.0,
+        "instructions": "Lie against an incline bench, with your arms holding a barbell and hanging down in a horizontal line. This will be your starting position. While keeping the upper arms stationary, curl the weight up as high as you can while squeezing the biceps. Breathe out as you perform this portion of the movement. Tip: Only the forearms should move. Do not swing the arms. After a second contraction, slowly go back to the starting position as you inhale. Tip: Make sure that you go all of the way down. Repeat for the recommended amount of repetitions.",
+        "gif_url": "",
+        "search_context": "{\"id\": \"ex_gh_45\", \"name\": \"Barbell Curls Lying Against An Incline\", \"target_muscle\": \"biceps\", \"secondary_muscles\": [], \"body_parts\": [], \"equipment\": \"barbell\", \"estimated_met\": 6.0, \"instructions\": \"Lie against an incline bench, with your arms holding a barbell and hanging down in a horizontal line. This will be your starting position. While keeping the upper arms stationary, curl the weight up as high as you can while squeezing the biceps. Breathe out as you perform this portion of the movement. Tip: Only the forearms should move. Do not swing the arms. After a second contraction, slowly go back to the starting position as you inhale. Tip: Make sure that you go all of the way down. Repeat for the recommended amount of repetitions.\", \"gif_url\": \"\"}",
+        "_score": 0.74090695
+      }
+    ],
+    "recipes": [
+      {
+        "id": "rec_fs_115",
+        "name": "Beef with Black Bean Sauce",
+        "recipe_description": "Black bean sauce provides a delicious Asian flavor for this dish which is great with beef, lamb or chicken",
+        "recipe_url": "https://foods.fatsecret.com/recipes/beef-with-black-bean-sauce/Default.aspx",
+        "recipe_image": "",
+        "rating": 2.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "beef"
+        ],
+        "macros": {
+          "calories": 405,
+          "protein_g": 51.7,
+          "carbs_g": 16.3,
+          "fats_g": 13.2,
+          "saturated_fat_g": 4.3,
+          "polyunsaturated_fat_g": 1.6,
+          "monounsaturated_fat_g": 6.0,
+          "cholesterol_mg": 138.0,
+          "sodium_mg": 817.0,
+          "potassium_mg": 1213.0,
+          "fiber_g": 3.2,
+          "sugar_g": 4.5,
+          "vitamin_a_dv": 7.0,
+          "vitamin_c_dv": 95.0,
+          "calcium_dv": 3.0,
+          "iron_dv": 33.0
+        },
+        "ingredients": "1 tsp sesame oil, 1 tsp oil, 1/4 cup chicken stock, 4 cloves garlic, crushed, 2 tsps ginger, grated, 3 large spring onions, chopped, 1 medium green pepper, sliced, 1/2 cup slices water chestnuts, 1 medium sweet red pepper, sliced, 1 tbsp black beans, rinsed and chopped, 2 tbsps soy sauce, 2 tsps ketchup manis, 1 tsp sugar, 2 lbs sirloin steak, strips, 1 fl oz rice wine, 1/2 oz corn flour (3 tsp)",
+        "instructions": "Marinate the beef strips for 1 hour in 1 tbsp soy sauce, 2 tsp rice wine, 1/2 tsp sesame oil and 1 tsp cornflour. Heat 2 tablespoons of oil to almost smoking in a wok. Add the beef and brown – remove. Add another tablespoon of oil to wok and heat. Stir fry the spring onion, garlic, black beans and ginger for 20 seconds. Add the peppers and water chestnuts and stir fry another minute. Combine the remaining soy, wine, cornflour and sesame oil and ketcup manis, sugar and stockand simmer until thickened. Add the beef and toss lightly in the sauce until cooked through.",
+        "search_context": "{\"id\": \"rec_fs_115\", \"name\": \"Beef with Black Bean Sauce\", \"recipe_description\": \"Black bean sauce provides a delicious Asian flavor for this dish which is great with beef, lamb or chicken\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/beef-with-black-bean-sauce/Default.aspx\", \"recipe_image\": \"\", \"rating\": 2.0, \"ready_in_minutes\": 30, \"diets\": [\"beef\"], \"macros\": {\"calories\": 405, \"protein_g\": 51.7, \"carbs_g\": 16.3, \"fats_g\": 13.2, \"saturated_fat_g\": 4.3, \"polyunsaturated_fat_g\": 1.6, \"monounsaturated_fat_g\": 6.0, \"cholesterol_mg\": 138.0, \"sodium_mg\": 817.0, \"potassium_mg\": 1213.0, \"fiber_g\": 3.2, \"sugar_g\": 4.5, \"vitamin_a_dv\": 7.0, \"vitamin_c_dv\": 95.0, \"calcium_dv\": 3.0, \"iron_dv\": 33.0}, \"ingredients\": \"1 tsp sesame oil, 1 tsp oil, 1/4 cup chicken stock, 4 cloves garlic, crushed, 2 tsps ginger, grated, 3 large spring onions, chopped, 1 medium green pepper, sliced, 1/2 cup slices water chestnuts, 1 medium sweet red pepper, sliced, 1 tbsp black beans, rinsed and chopped, 2 tbsps soy sauce, 2 tsps ketchup manis, 1 tsp sugar, 2 lbs sirloin steak, strips, 1 fl oz rice wine, 1/2 oz corn flour (3 tsp)\", \"instructions\": \"Marinate the beef strips for 1 hour in 1 tbsp soy sauce, 2 tsp rice wine, 1/2 tsp sesame oil and 1 tsp cornflour. Heat 2 tablespoons of oil to almost smoking in a wok. Add the beef and brown – remove. Add another tablespoon of oil to wok and heat. Stir fry the spring onion, garlic, black beans and ginger for 20 seconds. Add the peppers and water chestnuts and stir fry another minute. Combine the remaining soy, wine, cornflour and sesame oil and ketcup manis, sugar and stockand simmer until thickened. Add the beef and toss lightly in the sauce until cooked through.\"}",
+        "_score": 0.65457904
+      },
+      {
+        "id": "rec_fs_175424",
+        "name": "Meat Sauce",
+        "recipe_description": "An almost homemade meat sauce for pasta made with venison instead of beef.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/meat-sauce/Default.aspx",
+        "recipe_image": "",
+        "rating": 4.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "pasta"
+        ],
+        "macros": {
+          "calories": 108,
+          "protein_g": 13.7,
+          "carbs_g": 7.3,
+          "fats_g": 2.7,
+          "saturated_fat_g": 0.9,
+          "polyunsaturated_fat_g": 0.5,
+          "monounsaturated_fat_g": 0.4,
+          "cholesterol_mg": 20.0,
+          "sodium_mg": 429.0,
+          "potassium_mg": 217.0,
+          "fiber_g": 0.7,
+          "sugar_g": 5.0,
+          "vitamin_a_dv": 2.0,
+          "vitamin_c_dv": 3.0,
+          "calcium_dv": 2.0,
+          "iron_dv": 4.0
+        },
+        "ingredients": "1 1/2 tsps sugar, 32 oz ground venison, 1 tbsp dried garlic flakes, 1 tbsp onion powder, 4 tsps ground oregano, 1 tbsp pepper, 1 tsp salt, 3 cups pasta sauce, 1 fl oz lemon juice, 1 cup chopped celery",
+        "instructions": "Brown venison and add seasonings while browning. Add sauce and celery. Let simmer and season to taste.",
+        "search_context": "{\"id\": \"rec_fs_175424\", \"name\": \"Meat Sauce\", \"recipe_description\": \"An almost homemade meat sauce for pasta made with venison instead of beef.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/meat-sauce/Default.aspx\", \"recipe_image\": \"\", \"rating\": 4.0, \"ready_in_minutes\": 30, \"diets\": [\"pasta\"], \"macros\": {\"calories\": 108, \"protein_g\": 13.7, \"carbs_g\": 7.3, \"fats_g\": 2.7, \"saturated_fat_g\": 0.9, \"polyunsaturated_fat_g\": 0.5, \"monounsaturated_fat_g\": 0.4, \"cholesterol_mg\": 20.0, \"sodium_mg\": 429.0, \"potassium_mg\": 217.0, \"fiber_g\": 0.7, \"sugar_g\": 5.0, \"vitamin_a_dv\": 2.0, \"vitamin_c_dv\": 3.0, \"calcium_dv\": 2.0, \"iron_dv\": 4.0}, \"ingredients\": \"1 1/2 tsps sugar, 32 oz ground venison, 1 tbsp dried garlic flakes, 1 tbsp onion powder, 4 tsps ground oregano, 1 tbsp pepper, 1 tsp salt, 3 cups pasta sauce, 1 fl oz lemon juice, 1 cup chopped celery\", \"instructions\": \"Brown venison and add seasonings while browning. Add sauce and celery. Let simmer and season to taste.\"}",
+        "_score": 0.65279025
+      },
+      {
+        "id": "rec_fs_69326965",
+        "name": "Vegetarian Pesto Pasta",
+        "recipe_description": "Using lentil pasta gives this dish a boost of protein, making a balanced and satisfying meal.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/69326965-vegetarian-pesto-pasta/Default.aspx",
+        "recipe_image": "",
+        "rating": 0.0,
+        "ready_in_minutes": 25,
+        "diets": [
+          "vegetarian"
+        ],
+        "macros": {
+          "calories": 647,
+          "protein_g": 34.8,
+          "carbs_g": 78.9,
+          "fats_g": 23.0,
+          "saturated_fat_g": 1.2,
+          "polyunsaturated_fat_g": 1.1,
+          "monounsaturated_fat_g": 5.4,
+          "cholesterol_mg": 0.0,
+          "sodium_mg": 155.0,
+          "potassium_mg": 1296.0,
+          "fiber_g": 9.4,
+          "sugar_g": 5.0,
+          "vitamin_a_dv": 23.0,
+          "vitamin_c_dv": 20.0,
+          "calcium_dv": 4.0,
+          "iron_dv": 42.0
+        },
+        "ingredients": "50 g pesto, 2 cups baby spinach, 225 g red lentil pasta, 1/2 cup cooked green peas (from frozen), 1 tbsp olive oil, 1/2 cup cherry tomatoes, 2 cloves garlic",
+        "instructions": "Boil the pasta as per packet instructions. Reserve some of the pasta water (roughly 1/4 cup), strain the pasta and place it in mixing bowl. Slice the cloves of garlic. In a saucepan over medium heat, heat the olive oil and add the garlic. Cook the garlic for about a minute, or until it is lightly golden. To the pan, add the pesto, pasta, baby spinach, frozen peas, cherry tomatoes and stir to combine. Slowly add a few splashes of the pasta water to allow the pasta to mix easily and combine the ingredients.",
+        "search_context": "{\"id\": \"rec_fs_69326965\", \"name\": \"Vegetarian Pesto Pasta\", \"recipe_description\": \"Using lentil pasta gives this dish a boost of protein, making a balanced and satisfying meal.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/69326965-vegetarian-pesto-pasta/Default.aspx\", \"recipe_image\": \"\", \"rating\": 0.0, \"ready_in_minutes\": 25, \"diets\": [\"vegetarian\"], \"macros\": {\"calories\": 647, \"protein_g\": 34.8, \"carbs_g\": 78.9, \"fats_g\": 23.0, \"saturated_fat_g\": 1.2, \"polyunsaturated_fat_g\": 1.1, \"monounsaturated_fat_g\": 5.4, \"cholesterol_mg\": 0.0, \"sodium_mg\": 155.0, \"potassium_mg\": 1296.0, \"fiber_g\": 9.4, \"sugar_g\": 5.0, \"vitamin_a_dv\": 23.0, \"vitamin_c_dv\": 20.0, \"calcium_dv\": 4.0, \"iron_dv\": 42.0}, \"ingredients\": \"50 g pesto, 2 cups baby spinach, 225 g red lentil pasta, 1/2 cup cooked green peas (from frozen), 1 tbsp olive oil, 1/2 cup cherry tomatoes, 2 cloves garlic\", \"instructions\": \"Boil the pasta as per packet instructions. Reserve some of the pasta water (roughly 1/4 cup), strain the pasta and place it in mixing bowl. Slice the cloves of garlic. In a saucepan over medium heat, heat the olive oil and add the garlic. Cook the garlic for about a minute, or until it is lightly golden. To the pan, add the pesto, pasta, baby spinach, frozen peas, cherry tomatoes and stir to combine. Slowly add a few splashes of the pasta water to allow the pasta to mix easily and combine the ingredients.\"}",
+        "_score": 0.7430473
+      },
+      {
+        "id": "rec_fs_78284",
+        "name": "Penne Pasta with Beans and Greens",
+        "recipe_description": "A great way to get lots of veggies and protein in one bowl.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/penne-pasta-with-beans-and-greens/Default.aspx",
+        "recipe_image": "",
+        "rating": 4.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "pasta"
+        ],
+        "macros": {
+          "calories": 617,
+          "protein_g": 36.3,
+          "carbs_g": 107.0,
+          "fats_g": 7.2,
+          "saturated_fat_g": 2.3,
+          "polyunsaturated_fat_g": 1.4,
+          "monounsaturated_fat_g": 2.7,
+          "cholesterol_mg": 6.0,
+          "sodium_mg": 576.0,
+          "potassium_mg": 2508.0,
+          "fiber_g": 33.6,
+          "sugar_g": 6.7,
+          "vitamin_a_dv": 63.0,
+          "vitamin_c_dv": 39.0,
+          "calcium_dv": 33.0,
+          "iron_dv": 68.0
+        },
+        "ingredients": "1/4 cup parmesan cheese, 1/2 tsp leaves dried oregano, 1/4 tsp pepper, 1/4 tsp salt, 2 tsps olive oil, 15 3/4 oz chicken broth, 1/2 cup chopped carrots, 1 clove garlic, minced, 1/2 cup chopped onions, 1 package spinach, thawed, 4 oz penne pasta, 14 1/2 oz italian style diced tomatoes, 16 oz white beans",
+        "instructions": "Heat oil in saucepan, add carrots, onion and garlic, cook 5 minutes. Add oregano, salt, pepper, broth and tomatoes; bring to a boil. Cover, reduce heat and simmer 10 minutes. Increase heat to medium-high; add pasta, beans and spinach; cook 14 minutes, or until pasta is done, stirring occasionally. Sprinkle each serving with parmesan cheese.",
+        "search_context": "{\"id\": \"rec_fs_78284\", \"name\": \"Penne Pasta with Beans and Greens\", \"recipe_description\": \"A great way to get lots of veggies and protein in one bowl.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/penne-pasta-with-beans-and-greens/Default.aspx\", \"recipe_image\": \"\", \"rating\": 4.0, \"ready_in_minutes\": 30, \"diets\": [\"pasta\"], \"macros\": {\"calories\": 617, \"protein_g\": 36.3, \"carbs_g\": 107.0, \"fats_g\": 7.2, \"saturated_fat_g\": 2.3, \"polyunsaturated_fat_g\": 1.4, \"monounsaturated_fat_g\": 2.7, \"cholesterol_mg\": 6.0, \"sodium_mg\": 576.0, \"potassium_mg\": 2508.0, \"fiber_g\": 33.6, \"sugar_g\": 6.7, \"vitamin_a_dv\": 63.0, \"vitamin_c_dv\": 39.0, \"calcium_dv\": 33.0, \"iron_dv\": 68.0}, \"ingredients\": \"1/4 cup parmesan cheese, 1/2 tsp leaves dried oregano, 1/4 tsp pepper, 1/4 tsp salt, 2 tsps olive oil, 15 3/4 oz chicken broth, 1/2 cup chopped carrots, 1 clove garlic, minced, 1/2 cup chopped onions, 1 package spinach, thawed, 4 oz penne pasta, 14 1/2 oz italian style diced tomatoes, 16 oz white beans\", \"instructions\": \"Heat oil in saucepan, add carrots, onion and garlic, cook 5 minutes. Add oregano, salt, pepper, broth and tomatoes; bring to a boil. Cover, reduce heat and simmer 10 minutes. Increase heat to medium-high; add pasta, beans and spinach; cook 14 minutes, or until pasta is done, stirring occasionally. Sprinkle each serving with parmesan cheese.\"}",
+        "_score": 0.7490026
+      },
+      {
+        "id": "rec_fs_645",
+        "name": "Sausage Cheese Balls",
+        "recipe_description": "Wonderful as a snack.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/sausage-cheese-balls/Default.aspx",
+        "recipe_image": "",
+        "rating": 3.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "pork"
+        ],
+        "macros": {
+          "calories": 183,
+          "protein_g": 9.7,
+          "carbs_g": 0.1,
+          "fats_g": 15.8,
+          "saturated_fat_g": 6.4,
+          "polyunsaturated_fat_g": 1.8,
+          "monounsaturated_fat_g": 6.5,
+          "cholesterol_mg": 45.0,
+          "sodium_mg": 359.0,
+          "potassium_mg": 124.0,
+          "fiber_g": 0.0,
+          "sugar_g": 0.1,
+          "vitamin_a_dv": 4.0,
+          "vitamin_c_dv": 0.0,
+          "calcium_dv": 7.0,
+          "iron_dv": 3.0
+        },
+        "ingredients": "1 cup shredded cheddar cheese, 16 oz pork sausage",
+        "instructions": "Preheat oven to 400 °F (200 °C). With hands, combine sausage and cheese. Bake in oven until browned. Note: serving size will change depending on how big you make the balls.",
+        "search_context": "{\"id\": \"rec_fs_645\", \"name\": \"Sausage Cheese Balls\", \"recipe_description\": \"Wonderful as a snack.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/sausage-cheese-balls/Default.aspx\", \"recipe_image\": \"\", \"rating\": 3.0, \"ready_in_minutes\": 30, \"diets\": [\"pork\"], \"macros\": {\"calories\": 183, \"protein_g\": 9.7, \"carbs_g\": 0.1, \"fats_g\": 15.8, \"saturated_fat_g\": 6.4, \"polyunsaturated_fat_g\": 1.8, \"monounsaturated_fat_g\": 6.5, \"cholesterol_mg\": 45.0, \"sodium_mg\": 359.0, \"potassium_mg\": 124.0, \"fiber_g\": 0.0, \"sugar_g\": 0.1, \"vitamin_a_dv\": 4.0, \"vitamin_c_dv\": 0.0, \"calcium_dv\": 7.0, \"iron_dv\": 3.0}, \"ingredients\": \"1 cup shredded cheddar cheese, 16 oz pork sausage\", \"instructions\": \"Preheat oven to 400 °F (200 °C). With hands, combine sausage and cheese. Bake in oven until browned. Note: serving size will change depending on how big you make the balls.\"}",
+        "_score": 0.7644111
+      },
+      {
+        "id": "rec_fs_14782",
+        "name": "Pasta Bolognese",
+        "recipe_description": "A simple minced beef bolognese with fusilli pasta, topped with cheddar cheese.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/pasta-bolognese/Default.aspx",
+        "recipe_image": "",
+        "rating": 2.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "beef"
+        ],
+        "macros": {
+          "calories": 493,
+          "protein_g": 33.7,
+          "carbs_g": 75.6,
+          "fats_g": 8.6,
+          "saturated_fat_g": 4.0,
+          "polyunsaturated_fat_g": 0.9,
+          "monounsaturated_fat_g": 2.8,
+          "cholesterol_mg": 58.0,
+          "sodium_mg": 963.0,
+          "potassium_mg": 1001.0,
+          "fiber_g": 2.9,
+          "sugar_g": 9.8,
+          "vitamin_a_dv": 7.0,
+          "vitamin_c_dv": 21.0,
+          "calcium_dv": 16.0,
+          "iron_dv": 34.0
+        },
+        "ingredients": "2 tsps leaves mixed herbs, 2 tsps garlic powder, 1 tbsp worcestershire sauce, 1 large onion, diced, 25 g beef gravy granules, 150 g mushrooms, 15 fl oz boiled water, 400 g chopped tomatoes, 300 g fusilli pasta, 300 g lean ground beef, 80 g cheddar cheese, reduced fat",
+        "instructions": "For the pasta, add pasta to saucepan of boiling water and simmer until tender. For the bolognese sauce, brown the ground beef, diced onion and chopped mushrooms in another saucepan, stirring until cooked (Don't add any oil or fat as the beef will cook in its own juices). Add can of chopped tomatoes to the beef and then simmer gently to make the bolognese sauce. Stir in a sprinkling of garlic powder and mixed herbs. Add water to the sauce, then stir in 6 heaped teaspoons of beef gravy granules to thicken sauce. To serve, Drain the pasta when tender and return to saucepan.  Pour bolognese sauce over the pasta, then stir until mixed in. Serve immediately, topped with a sprinkling of cheddar cheese if desired. Note: for extra flavor, you could also add some worcestershire sauce to the bolognese sauce.",
+        "search_context": "{\"id\": \"rec_fs_14782\", \"name\": \"Pasta Bolognese\", \"recipe_description\": \"A simple minced beef bolognese with fusilli pasta, topped with cheddar cheese.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/pasta-bolognese/Default.aspx\", \"recipe_image\": \"\", \"rating\": 2.0, \"ready_in_minutes\": 30, \"diets\": [\"beef\"], \"macros\": {\"calories\": 493, \"protein_g\": 33.7, \"carbs_g\": 75.6, \"fats_g\": 8.6, \"saturated_fat_g\": 4.0, \"polyunsaturated_fat_g\": 0.9, \"monounsaturated_fat_g\": 2.8, \"cholesterol_mg\": 58.0, \"sodium_mg\": 963.0, \"potassium_mg\": 1001.0, \"fiber_g\": 2.9, \"sugar_g\": 9.8, \"vitamin_a_dv\": 7.0, \"vitamin_c_dv\": 21.0, \"calcium_dv\": 16.0, \"iron_dv\": 34.0}, \"ingredients\": \"2 tsps leaves mixed herbs, 2 tsps garlic powder, 1 tbsp worcestershire sauce, 1 large onion, diced, 25 g beef gravy granules, 150 g mushrooms, 15 fl oz boiled water, 400 g chopped tomatoes, 300 g fusilli pasta, 300 g lean ground beef, 80 g cheddar cheese, reduced fat\", \"instructions\": \"For the pasta, add pasta to saucepan of boiling water and simmer until tender. For the bolognese sauce, brown the ground beef, diced onion and chopped mushrooms in another saucepan, stirring until cooked (Don't add any oil or fat as the beef will cook in its own juices). Add can of chopped tomatoes to the beef and then simmer gently to make the bolognese sauce. Stir in a sprinkling of garlic powder and mixed herbs. Add water to the sauce, then stir in 6 heaped teaspoons of beef gravy granules to thicken sauce. To serve, Drain the pasta when tender and return to saucepan.  Pour bolognese sauce over the pasta, then stir until mixed in. Serve immediately, topped with a sprinkling of cheddar cheese if desired. Note: for extra flavor, you could also add some worcestershire sauce to the bolognese sauce.\"}",
+        "_score": 0.65050864
+      },
+      {
+        "id": "rec_fs_98421",
+        "name": "Breakfast Pizza",
+        "recipe_description": "A hearty and easy to make breakfast meal that will curb your hunger.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/breakfast-pizza/Default.aspx",
+        "recipe_image": "",
+        "rating": 3.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "pork"
+        ],
+        "macros": {
+          "calories": 286,
+          "protein_g": 13.9,
+          "carbs_g": 10.5,
+          "fats_g": 20.4,
+          "saturated_fat_g": 7.8,
+          "polyunsaturated_fat_g": 1.7,
+          "monounsaturated_fat_g": 5.7,
+          "cholesterol_mg": 132.0,
+          "sodium_mg": 488.0,
+          "potassium_mg": 126.0,
+          "fiber_g": 0.3,
+          "sugar_g": 1.5,
+          "vitamin_a_dv": 4.0,
+          "vitamin_c_dv": 0.0,
+          "calcium_dv": 6.0,
+          "iron_dv": 5.0
+        },
+        "ingredients": "1 cup shredded cheddar cheese, 1 cup hash brown potatoes, 5 large eggs, 1/2 cup grated parmesan cheese, 16 oz pork sausage, 8 crescent rolls dough",
+        "instructions": "Preheat oven to 375 °F (190 °C) Open crescent roll dough and spread on 12\" pizza pan. Be sure to seal any seams and holes. Brown, drain and crumble pork sausage. Thaw frozen hash brown potatoes, and spread over crescent dough. Cover with cheddar cheese. Beat eggs and pour evenly over \"pizza\". Cover with grated parmesan cheese. Bake for 25-30 minutes.",
+        "search_context": "{\"id\": \"rec_fs_98421\", \"name\": \"Breakfast Pizza\", \"recipe_description\": \"A hearty and easy to make breakfast meal that will curb your hunger.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/breakfast-pizza/Default.aspx\", \"recipe_image\": \"\", \"rating\": 3.0, \"ready_in_minutes\": 30, \"diets\": [\"pork\"], \"macros\": {\"calories\": 286, \"protein_g\": 13.9, \"carbs_g\": 10.5, \"fats_g\": 20.4, \"saturated_fat_g\": 7.8, \"polyunsaturated_fat_g\": 1.7, \"monounsaturated_fat_g\": 5.7, \"cholesterol_mg\": 132.0, \"sodium_mg\": 488.0, \"potassium_mg\": 126.0, \"fiber_g\": 0.3, \"sugar_g\": 1.5, \"vitamin_a_dv\": 4.0, \"vitamin_c_dv\": 0.0, \"calcium_dv\": 6.0, \"iron_dv\": 5.0}, \"ingredients\": \"1 cup shredded cheddar cheese, 1 cup hash brown potatoes, 5 large eggs, 1/2 cup grated parmesan cheese, 16 oz pork sausage, 8 crescent rolls dough\", \"instructions\": \"Preheat oven to 375 °F (190 °C) Open crescent roll dough and spread on 12\\\" pizza pan. Be sure to seal any seams and holes. Brown, drain and crumble pork sausage. Thaw frozen hash brown potatoes, and spread over crescent dough. Cover with cheddar cheese. Beat eggs and pour evenly over \\\"pizza\\\". Cover with grated parmesan cheese. Bake for 25-30 minutes.\"}",
+        "_score": 0.6501746
+      },
+      {
+        "id": "rec_fs_82722",
+        "name": "Trail Mix Sandwich",
+        "recipe_description": "An easy, yummy vegetarian sandwich.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/trail-mix-sandwich/Default.aspx",
+        "recipe_image": "",
+        "rating": 2.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "vegetarian"
+        ],
+        "macros": {
+          "calories": 423,
+          "protein_g": 14.1,
+          "carbs_g": 57.5,
+          "fats_g": 17.2,
+          "saturated_fat_g": 3.4,
+          "polyunsaturated_fat_g": 5.8,
+          "monounsaturated_fat_g": 6.8,
+          "cholesterol_mg": 0.0,
+          "sodium_mg": 333.0,
+          "potassium_mg": 571.0,
+          "fiber_g": 8.6,
+          "sugar_g": 21.3,
+          "vitamin_a_dv": 0.0,
+          "vitamin_c_dv": 7.0,
+          "calcium_dv": 6.0,
+          "iron_dv": 19.0
+        },
+        "ingredients": "1 oz granola, 1/4 small apple, 1/2 small banana, 1 tbsp peanut butter, 2 slices mixed grain bread",
+        "instructions": "Spread peanut butter on one slice of bread. Thinly slice apple, slice banana and layer on top of your peanut butter. Sprinkle with granola and enjoy.",
+        "search_context": "{\"id\": \"rec_fs_82722\", \"name\": \"Trail Mix Sandwich\", \"recipe_description\": \"An easy, yummy vegetarian sandwich.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/trail-mix-sandwich/Default.aspx\", \"recipe_image\": \"\", \"rating\": 2.0, \"ready_in_minutes\": 30, \"diets\": [\"vegetarian\"], \"macros\": {\"calories\": 423, \"protein_g\": 14.1, \"carbs_g\": 57.5, \"fats_g\": 17.2, \"saturated_fat_g\": 3.4, \"polyunsaturated_fat_g\": 5.8, \"monounsaturated_fat_g\": 6.8, \"cholesterol_mg\": 0.0, \"sodium_mg\": 333.0, \"potassium_mg\": 571.0, \"fiber_g\": 8.6, \"sugar_g\": 21.3, \"vitamin_a_dv\": 0.0, \"vitamin_c_dv\": 7.0, \"calcium_dv\": 6.0, \"iron_dv\": 19.0}, \"ingredients\": \"1 oz granola, 1/4 small apple, 1/2 small banana, 1 tbsp peanut butter, 2 slices mixed grain bread\", \"instructions\": \"Spread peanut butter on one slice of bread. Thinly slice apple, slice banana and layer on top of your peanut butter. Sprinkle with granola and enjoy.\"}",
+        "_score": 0.7496354
+      },
+      {
+        "id": "rec_fs_119766",
+        "name": "Vegan Cinnamon Almond Granola Bars",
+        "recipe_description": "A simple and easy treat, good for snacks, breakfasts or long hikes.",
+        "recipe_url": "https://foods.fatsecret.com/recipes/vegan-cinnamon-almond-granola-bars/Default.aspx",
+        "recipe_image": "",
+        "rating": 3.0,
+        "ready_in_minutes": 30,
+        "diets": [
+          "vegan"
+        ],
+        "macros": {
+          "calories": 214,
+          "protein_g": 5.7,
+          "carbs_g": 35.0,
+          "fats_g": 6.5,
+          "saturated_fat_g": 0.7,
+          "polyunsaturated_fat_g": 2.8,
+          "monounsaturated_fat_g": 2.5,
+          "cholesterol_mg": 0.0,
+          "sodium_mg": 3.0,
+          "potassium_mg": 152.0,
+          "fiber_g": 5.8,
+          "sugar_g": 15.1,
+          "vitamin_a_dv": 0.0,
+          "vitamin_c_dv": 1.0,
+          "calcium_dv": 3.0,
+          "iron_dv": 5.0
+        },
+        "ingredients": "1/3 cup flax seeds, 5 tbsp agave nectar, 2 1/4 cups rolled oats, 2 1/2 tsps cinnamon, 1/2 cup raisins, 1/3 cup, slivered almonds",
+        "instructions": "Combine all ingredients except dried fruit. Spread evenly on to a large baking sheet. Bake at 350 °F (175 °C) for 15 minutes, stirring mixture every 5 minutes. Note: you can add any other dried fruit like cranberries or dates, if you decide to modify.",
+        "search_context": "{\"id\": \"rec_fs_119766\", \"name\": \"Vegan Cinnamon Almond Granola Bars\", \"recipe_description\": \"A simple and easy treat, good for snacks, breakfasts or long hikes.\", \"recipe_url\": \"https://foods.fatsecret.com/recipes/vegan-cinnamon-almond-granola-bars/Default.aspx\", \"recipe_image\": \"\", \"rating\": 3.0, \"ready_in_minutes\": 30, \"diets\": [\"vegan\"], \"macros\": {\"calories\": 214, \"protein_g\": 5.7, \"carbs_g\": 35.0, \"fats_g\": 6.5, \"saturated_fat_g\": 0.7, \"polyunsaturated_fat_g\": 2.8, \"monounsaturated_fat_g\": 2.5, \"cholesterol_mg\": 0.0, \"sodium_mg\": 3.0, \"potassium_mg\": 152.0, \"fiber_g\": 5.8, \"sugar_g\": 15.1, \"vitamin_a_dv\": 0.0, \"vitamin_c_dv\": 1.0, \"calcium_dv\": 3.0, \"iron_dv\": 5.0}, \"ingredients\": \"1/3 cup flax seeds, 5 tbsp agave nectar, 2 1/4 cups rolled oats, 2 1/2 tsps cinnamon, 1/2 cup raisins, 1/3 cup, slivered almonds\", \"instructions\": \"Combine all ingredients except dried fruit. Spread evenly on to a large baking sheet. Bake at 350 °F (175 °C) for 15 minutes, stirring mixture every 5 minutes. Note: you can add any other dried fruit like cranberries or dates, if you decide to modify.\"}",
+        "_score": 0.7453417
+      }
+    ]
+  }
+}
