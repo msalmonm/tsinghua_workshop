@@ -2,14 +2,15 @@
 import requests
 import json
 
-url = "http://localhost:8000/api/recommend"
+url = "http://localhost:8001/api/recommend"
 payload = {
     "query": "Quiero perder peso y ganar músculo",
     "user_profile": {
         "age": 28,
         "sex": "male",
         "weight_kg": 85,
-        "height_cm": 175
+        "height_cm": 175,
+        "activity_level": "moderately_active"
     }
 }
 
@@ -34,10 +35,9 @@ try:
             print(f"Objetivo: {plan.get('plan_summary', {}).get('goal_detected', 'N/A')}")
             print(f"\nCalorías diarias promedio: {plan.get('nutrition_summary', {}).get('total_daily_calories_avg', 'N/A')}")
             print(f"Proteína diaria promedio: {plan.get('nutrition_summary', {}).get('total_daily_protein_g_avg', 'N/A')}g")
-            print(f"\nOpciones de comida:")
-            print(f"  - Desayunos: {len(plan.get('meal_options', {}).get('breakfast', []))}")
-            print(f"  - Almuerzos: {len(plan.get('meal_options', {}).get('lunch', []))}")
-            print(f"  - Cenas: {len(plan.get('meal_options', {}).get('dinner', []))}")
+            print(f"\nOpciones disponibles:")
+            print(f"  - Comidas: {len(plan.get('meal_options', []))}")
+            print(f"  - Snacks: {len(plan.get('snack_options', []))}")
             print(f"\nEjercicios disponibles: {len(plan.get('workout_options', []))}")
             print(f"Días en calendario: {len(plan.get('weekly_calendar', []))}")
         else:
