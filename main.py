@@ -762,6 +762,57 @@ def format_exercise(exercise):
 
 
 # =====================================================================
+# WEEKLY BALANCE (deterministic portion rebalancing)
+# =====================================================================
+PORTION_MIN = 0.5
+PORTION_MAX = 2.5
+PORTION_STEP = 0.25
+
+
+def _day_calories(day, catalog):
+    total = 0.0
+    for meal in day.get('meals', []):
+        ris = meal.get('recipe_indices', [])
+        pms = meal.get('portion_multipliers', [1.0] * len(ris))
+        if len(pms) < len(ris):
+            pms = pms + [1.0] * (len(ris) - len(pms))
+        for idx, mult in zip(ris, pms):
+            if 0 <= idx < len(catalog):
+                total += catalog[idx]['base_calories'] * mult
+    return total
+
+
+def _snap_portion(v):
+    v = round(v / PORTION_STEP) * PORTION_STEP
+    return round(max(PORTION_MIN, min(PORTION_MAX, v)), 2)
+
+
+def rebalance_portions(weekly_calendar, catalog, target_calories, iterations=4):
+    """Scale each day's portion multipliers toward the daily calorie target so
+    that all days converge to a similar total. Pushing every day to the same
+    target keeps the highest-vs-lowest spread well under the 15% limit.
+    Multipliers are snapped to realistic 0.25 steps within [0.5, 2.5]."""
+    if not weekly_calendar or target_calories <= 0:
+        return
+    for _ in range(iterations):
+        max_rel_err = 0.0
+        for day in weekly_calendar:
+            day_cal = _day_calories(day, catalog)
+            if day_cal <= 0:
+                continue
+            factor = target_calories / day_cal
+            max_rel_err = max(max_rel_err, abs(day_cal - target_calories) / target_calories)
+            for meal in day.get('meals', []):
+                ris = meal.get('recipe_indices', [])
+                pms = meal.get('portion_multipliers', [1.0] * len(ris))
+                if len(pms) < len(ris):
+                    pms = pms + [1.0] * (len(ris) - len(pms))
+                meal['portion_multipliers'] = [_snap_portion(pm * factor) for pm in pms]
+        if max_rel_err < 0.05:  # already within 5% of target on every day
+            break
+
+
+# =====================================================================
 # VALIDATION (single catalog source of truth + weekly balance)
 # =====================================================================
 def validate_nutrition_plan(daily_days, target_calories, target_protein_g, catalog):
@@ -1036,6 +1087,10 @@ RECIPE DATABASE (index 0-{len(catalog_summary)-1}):
     if len(weekly_calendar) > num_days:
         weekly_calendar = weekly_calendar[:num_days]
 
+    # Deterministically rebalance portions so daily calories/macros converge
+    # toward the target (keeps day-to-day spread under the 15% limit).
+    rebalance_portions(weekly_calendar, catalog, target_calories)
+
     validation_result = validate_nutrition_plan(
         weekly_calendar, target_calories, target_protein_g, catalog
     )
@@ -1120,8 +1175,3 @@ RECIPE DATABASE (index 0-{len(catalog_summary)-1}):
         "plan": complete_plan,
         "raw_data": {"exercises": workout_options, "recipes": diverse_recipes},
     }
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
