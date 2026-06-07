@@ -380,6 +380,85 @@ SNACK_KEYWORDS = [
     "popcorn", "trail mix", "smoothie", "yogurt", "yoghurt", "snack",
 ]
 
+# =====================================================================
+# MACRO PREFERENCES (generic, macro-aware retrieval & ranking)
+# Each macro maps to: the recipe field, whether it's a "density" macro
+# (judged as % of calories) or absolute, food words to seed retrieval for
+# the "high" direction, and EN/ES keyword regexes for high/low intent.
+# This is what lets ANY request ("low carb", "high fiber", "low calorie",
+# "high fat", "high protein") rank by REAL macro values instead of names.
+# =====================================================================
+MACRO_CONFIG = {
+    "protein": {
+        "field": "protein_g",
+        "kcal_per_g": 4,
+        "density": True,
+        "seed_high": "chicken breast beef steak fish salmon tuna eggs turkey shrimp lean meat greek yogurt cottage cheese lentils tofu",
+        "high": r"high[\s-]?protein|protein[\s-]?rich|more protein|lots of protein|alta?\s+en\s+prote[ií]na|alto\s+en\s+prote[ií]na|mucha prote[ií]na|prote[ií]na alta",
+        "low": r"low[\s-]?protein|baja?\s+en\s+prote[ií]na",
+    },
+    "carbs": {
+        "field": "carbs_g",
+        "kcal_per_g": 4,
+        "density": True,
+        "seed_high": "rice pasta potato bread oats quinoa noodles whole grains",
+        "high": r"high[\s-]?carb|carb[\s-]?heavy|more carbs|alta?\s+en\s+carbohidratos|alto\s+en\s+carbohidratos",
+        "low": r"low[\s-]?carb|low[\s-]?carbohydrate|keto|ketogenic|baja?\s+en\s+carbohidratos|bajo\s+en\s+carbohidratos|pocos carbohidratos|sin carbohidratos",
+    },
+    "fats": {
+        "field": "fats_g",
+        "kcal_per_g": 9,
+        "density": True,
+        "seed_high": "avocado olive oil nuts cheese salmon butter peanut butter",
+        "high": r"high[\s-]?fat|keto|ketogenic|alta?\s+en\s+grasa|alto\s+en\s+grasa",
+        "low": r"low[\s-]?fat|fat[\s-]?free|baja?\s+en\s+grasa|bajo\s+en\s+grasa|sin grasa",
+    },
+    "fiber": {
+        "field": "fiber_g",
+        "kcal_per_g": 0,
+        "density": False,
+        "seed_high": "beans lentils vegetables broccoli oats whole grains chia berries",
+        "high": r"high[\s-]?fiber|high[\s-]?fibre|fiber[\s-]?rich|alta?\s+en\s+fibra|alto\s+en\s+fibra|mucha fibra",
+        "low": r"low[\s-]?fiber|low[\s-]?fibre|baja?\s+en\s+fibra",
+    },
+    "calories": {
+        "field": "calories",
+        "kcal_per_g": 1,
+        "density": False,
+        "seed_high": "calorie dense hearty rich filling",
+        "high": r"high[\s-]?calorie|calorie[\s-]?dense|more calories|alta?\s+en\s+calor[ií]as",
+        "low": r"low[\s-]?calorie|low[\s-]?cal|light meals|baja?\s+en\s+calor[ií]as|bajo\s+en\s+calor[ií]as|pocas calor[ií]as",
+    },
+    "sugar": {
+        "field": "sugar_g",
+        "kcal_per_g": 4,
+        "density": False,
+        "seed_high": "",
+        "high": r"high[\s-]?sugar",
+        "low": r"low[\s-]?sugar|sugar[\s-]?free|no sugar|baja?\s+en\s+az[uú]car|sin az[uú]car",
+    },
+    "sodium": {
+        "field": "sodium_mg",
+        "kcal_per_g": 0,
+        "density": False,
+        "seed_high": "",
+        "high": r"high[\s-]?sodium|high[\s-]?salt",
+        "low": r"low[\s-]?sodium|low[\s-]?salt|baja?\s+en\s+sodio|bajo\s+en\s+sal|sin sal",
+    },
+}
+
+
+def detect_macro_prefs(q):
+    """Return a list of (macro, 'high'|'low') tuples found in the query.
+    'low' is checked first so 'low fat' isn't caught by a 'fat' high rule."""
+    prefs = []
+    for macro, cfg in MACRO_CONFIG.items():
+        if cfg.get("low") and re.search(cfg["low"], q):
+            prefs.append((macro, "low"))
+        elif cfg.get("high") and re.search(cfg["high"], q):
+            prefs.append((macro, "high"))
+    return prefs
+
 
 class UserProfile(BaseModel):
     age: int
@@ -600,6 +679,19 @@ def extract_intent(query):
     # --- meal prep / repetitive style ---
     meal_prep = bool(re.search(r'\b(meal prep|meal-prep|same meals|repetitive|repeat the same|batch cook)\b', q))
 
+    # --- macro preferences (generic: applies to ANY macro the user mentions) ---
+    # Each preference is (macro, direction): direction "high" or "low".
+    # Detected from the query in English and Spanish. The retrieval + ranking
+    # layer then orders recipes by the REAL macro value, not by name keywords
+    # (so "high protein" returns chicken/beef, not "protein pancakes").
+    macro_prefs = detect_macro_prefs(q)
+    # Goal-driven defaults (only added if the user didn't say otherwise).
+    pref_macros = {m for m, _ in macro_prefs}
+    if "protein" not in pref_macros and goal_type in ("muscle_gain", "recomp"):
+        macro_prefs.append(("protein", "high"))
+    if "calories" not in pref_macros and goal_type == "weight_loss":
+        macro_prefs.append(("calories", "low"))
+
     wants_weekly = num_days >= 7
 
     return {
@@ -611,6 +703,9 @@ def extract_intent(query):
         "num_days": num_days,
         "wants_weekly_plan": wants_weekly,
         "meal_prep_style": meal_prep,
+        "macro_prefs": macro_prefs,
+        # kept for backward compatibility / convenience
+        "high_protein": any(m == "protein" and d == "high" for m, d in macro_prefs),
     }
 
 
@@ -663,6 +758,68 @@ def diversify_by_name(recipes, limit):
         if len(out) >= limit:
             break
     return out
+
+
+def macro_value(recipe, macro):
+    """Absolute value of a macro from a recipe's macros block."""
+    cfg = MACRO_CONFIG.get(macro, {})
+    field = cfg.get("field", macro)
+    return recipe.get("macros", {}).get(field, 0) or 0
+
+
+def macro_density(recipe, macro):
+    """Share of a recipe's calories that come from this macro (0-1).
+    Used for energy macros (protein/carbs/fats) so we judge 'high protein'
+    by how protein-dense the food really is, not by absolute grams alone."""
+    cfg = MACRO_CONFIG.get(macro, {})
+    cal = recipe.get("macros", {}).get("calories", 0) or 0
+    if cal <= 0:
+        return 0.0
+    grams = macro_value(recipe, macro)
+    return max(0.0, min(1.0, (grams * cfg.get("kcal_per_g", 0)) / cal))
+
+
+# Backward-compatible protein helper used elsewhere
+def protein_density(recipe):
+    return macro_density(recipe, "protein")
+
+
+def rank_by_macro_prefs(recipes, macro_prefs):
+    """Order recipes to best satisfy the user's macro preferences, scoring by
+    REAL macro values (not name keywords). Works for any macro/direction:
+    high protein -> chicken/beef first; low carb -> low-carb dishes first; etc.
+
+    Scoring per recipe = sum over prefs of a normalized contribution:
+      - 'high' density macro: + (% calories from macro)
+      - 'low'  density macro: + (1 - % calories from macro)
+      - 'high' absolute macro (fiber/calories): + normalized rank
+      - 'low'  absolute macro: + inverse normalized rank
+    """
+    if not macro_prefs or not recipes:
+        return recipes
+
+    # Precompute min/max for absolute macros to normalize.
+    bounds = {}
+    for macro, _ in macro_prefs:
+        cfg = MACRO_CONFIG.get(macro, {})
+        if not cfg.get("density"):
+            vals = [macro_value(r, macro) for r in recipes]
+            bounds[macro] = (min(vals), max(vals))
+
+    def score(r):
+        s = 0.0
+        for macro, direction in macro_prefs:
+            cfg = MACRO_CONFIG.get(macro, {})
+            if cfg.get("density"):
+                d = macro_density(r, macro)
+                s += d if direction == "high" else (1.0 - d)
+            else:
+                lo, hi = bounds.get(macro, (0, 0))
+                norm = (macro_value(r, macro) - lo) / (hi - lo) if hi > lo else 0.0
+                s += norm if direction == "high" else (1.0 - norm)
+        return s
+
+    return sorted(recipes, key=score, reverse=True)
 
 
 def select_exercises(pool, target_muscles, total=14, focus_ratio=0.55):
@@ -941,8 +1098,27 @@ def get_recommendation(request: QueryRequest):
         "maintenance": "balanced nuts fruit whole grain snacks",
     }
     diet_text = " ".join(intent["dietary_restrictions"])
-    main_recipes = search_elasticsearch("recipes", base_vector, k=45, filter_zero_macros=True)
-    breakfast_vec = model.encode(f"{request.query} {diet_text} healthy breakfast eggs oats smoothie yogurt").tolist()
+    macro_prefs = intent.get("macro_prefs", [])
+
+    # Seed retrieval with REAL foods for any "high X" macro preference so the
+    # candidate pool contains foods that actually satisfy the request (e.g.
+    # high protein -> meat/fish/eggs; high fiber -> beans/veg; not name matches).
+    seed_terms = []
+    for macro, direction in macro_prefs:
+        if direction == "high":
+            seed = MACRO_CONFIG.get(macro, {}).get("seed_high", "")
+            if seed:
+                seed_terms.append(seed)
+    if seed_terms:
+        main_vec = model.encode(f"{request.query} {diet_text} {' '.join(seed_terms)}").tolist()
+    else:
+        main_vec = base_vector
+
+    main_recipes = search_elasticsearch("recipes", main_vec, k=60, filter_zero_macros=True)
+    wants_high_protein = any(m == "protein" and d == "high" for m, d in macro_prefs)
+    breakfast_seed = "high protein breakfast eggs omelette greek yogurt cottage cheese" if wants_high_protein \
+        else "healthy breakfast eggs oats smoothie yogurt"
+    breakfast_vec = model.encode(f"{request.query} {diet_text} {breakfast_seed}").tolist()
     breakfast_recipes = search_elasticsearch("recipes", breakfast_vec, k=12, filter_zero_macros=True)
     snack_vec = model.encode(f"{request.query} {diet_text} {snack_hints.get(goal_type, 'healthy snacks')}").tolist()
     snack_recipes = search_elasticsearch("recipes", snack_vec, k=15, filter_zero_macros=True)
@@ -950,7 +1126,14 @@ def get_recommendation(request: QueryRequest):
     merged = {}
     for r in main_recipes + breakfast_recipes + snack_recipes:
         merged[r['id']] = r
-    diverse_recipes = diversify_by_name(list(merged.values()), limit=30)
+    pool = list(merged.values())
+
+    # Macro-aware ranking: order the pool by how well each recipe satisfies the
+    # user's macro preferences (real macro values), BEFORE trimming the catalog.
+    if macro_prefs:
+        pool = rank_by_macro_prefs(pool, macro_prefs)
+
+    diverse_recipes = diversify_by_name(pool, limit=30)
     catalog = [format_recipe_with_portions(r) for r in diverse_recipes]
 
     if not catalog:
@@ -978,6 +1161,12 @@ def get_recommendation(request: QueryRequest):
             "protein_g": r["base_protein_g"],
             "carbs_g": r["base_carbs_g"],
             "fats_g": r["base_fats_g"],
+            # % of calories from each energy macro, so the LLM can judge a
+            # protein-dense food (chicken) from a carby "protein pancake",
+            # a low-carb dish from a carb-heavy one, etc.
+            "protein_pct": (round((r["base_protein_g"] * 4) / r["base_calories"] * 100) if r["base_calories"] else 0),
+            "carbs_pct": (round((r["base_carbs_g"] * 4) / r["base_calories"] * 100) if r["base_calories"] else 0),
+            "fats_pct": (round((r["base_fats_g"] * 9) / r["base_calories"] * 100) if r["base_calories"] else 0),
             "prep_min": r["ready_in_minutes"],
             "ingredient_count": r["ingredient_count"],
             "tags": r["diet_tags"][:4],
@@ -990,6 +1179,26 @@ def get_recommendation(request: QueryRequest):
     body_focus_text = ", ".join(target_body_parts) if target_body_parts else "balanced full body"
     diet_restr_text = ", ".join(intent["dietary_restrictions"]) if intent["dietary_restrictions"] else "none"
     meal_prep_text = "YES - the user wants a repetitive meal-prep style plan" if intent["meal_prep_style"] else "NO - vary meals across days"
+
+    # Generic macro-preference rule for the LLM (works for any macro/direction).
+    macro_prefs = intent.get("macro_prefs", [])
+    if macro_prefs:
+        pref_phrases = []
+        for macro, direction in macro_prefs:
+            if MACRO_CONFIG.get(macro, {}).get("density"):
+                if direction == "high":
+                    pref_phrases.append(f"{macro} (favor recipes with a high {macro}_pct; judge by real macros, NOT by the word '{macro}' in the name)")
+                else:
+                    pref_phrases.append(f"low {macro} (favor recipes with a low {macro}_pct)")
+            else:
+                pref_phrases.append(f"{direction} {macro}")
+        macro_rule = (
+            "\n   - MACRO PREFERENCES: the user wants " + "; ".join(pref_phrases) +
+            ". Choose recipes whose ACTUAL macro values satisfy this, not recipes "
+            "that merely mention the macro in their name."
+        )
+    else:
+        macro_rule = ""
 
     llm_prompt = f"""You are a SENIOR NUTRITIONIST and CERTIFIED STRENGTH COACH. Build a realistic, professional, and personalized plan.
 
@@ -1025,7 +1234,7 @@ STRICT RULES:
    - Lunch and Dinner use full "main" meals; do NOT put breakfast-only foods at dinner unless requested.
    - Snacks must be light/simple: prefer recipes with "snack_friendly": true (low calories, few ingredients, low prep time). Never assign a heavy full meal as a snack.
    - NEVER repeat the same recipe twice in the SAME day.
-   - Unless meal-prep style is YES, do NOT repeat the exact same Breakfast or Dinner across all days; vary them.
+   - Unless meal-prep style is YES, do NOT repeat the exact same Breakfast or Dinner across all days; vary them.{macro_rule}
 6. MACRO DISTRIBUTION: a meal may combine 1-3 recipes (e.g., main dish + side, pancakes + eggs, smoothie + toast). Put 2-3 indices in "recipe_indices" with matching "portion_multipliers" when it helps hit the daily targets. Adjust portion_multipliers (0.5, 1.0, 1.5, 2.0) to land near the targets.
 7. CONSISTENCY: keep daily calories and macros similar across days. The difference between the highest and lowest day must stay under 15%.
 8. Include 2-3 snacks per day for balanced nutrition.

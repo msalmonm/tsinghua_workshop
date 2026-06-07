@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """
-Direct test of main.py functionality without requiring the server to be running
-Tests the recommendation logic by directly calling the function
+Generar 3 nuevas respuestas con main.py actualizado
 """
 import os
 import sys
 import json
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Import the required components
 from main import (
     UserProfile, QueryRequest, get_recommendation,
     calculate_bmr, calculate_tdee, get_activity_factor,
@@ -19,10 +16,10 @@ from main import (
 )
 
 print("=" * 80)
-print("Direct Test of main.py Recommendation Logic")
+print("Generando 3 Nuevas Respuestas - main.py Actualizado")
 print("=" * 80)
 
-# Test cases
+# Nuevos casos de prueba
 test_cases = [
     {
         "name": "Recomposition - Back and Arms Focus",
@@ -62,20 +59,20 @@ test_cases = [
 results = []
 
 for i, test_case in enumerate(test_cases, 1):
-    print(f"\n[{i}/3] Testing: {test_case['name']}")
+    print(f"\n[{i}/3] Generando: {test_case['name']}")
     print(f"Query: {test_case['query']}")
     
     try:
-        # Test intent extraction first
-        print("  -> Extracting intent...")
+        # Extraer intent
+        print("  -> Extrayendo intent...")
         intent = extract_intent(test_case["query"])
-        print(f"     Fitness Goal: {intent['fitness_goal']}")
-        print(f"     Target Body Parts: {intent['target_body_parts']}")
-        print(f"     Training Frequency: {intent['training_frequency_per_week']}")
-        print(f"     Dietary Restrictions: {intent['dietary_restrictions']}")
+        print(f"     Objetivo Fitness: {intent['fitness_goal']}")
+        print(f"     Partes del Cuerpo: {intent['target_body_parts']}")
+        print(f"     Frecuencia Entrenamiento: {intent['training_frequency_per_week']}")
+        print(f"     Restricciones Dietéticas: {intent['dietary_restrictions']}")
         
-        # Test nutrition calculations
-        print("  -> Calculating nutrition targets...")
+        # Calcular nutrición
+        print("  -> Calculando objetivos de nutrición...")
         profile = test_case['profile']
         bmr = calculate_bmr(profile['weight_kg'], profile['height_cm'], profile['age'], profile['sex'])
         activity_factor = get_activity_factor(profile['activity_level'])
@@ -83,39 +80,36 @@ for i, test_case in enumerate(test_cases, 1):
         goal_type, calorie_adj = classify_goal(test_case['query'])
         print(f"     BMR: {bmr} kcal")
         print(f"     TDEE: {tdee} kcal")
-        print(f"     Goal: {goal_type} ({calorie_adj:+.0%})")
+        print(f"     Objetivo: {goal_type} ({calorie_adj:+.0%})")
         
-        # Create request objects
-        print("  -> Creating full recommendation...")
+        # Crear request
+        print("  -> Generando recomendación completa...")
         user_profile = UserProfile(**profile)
         request = QueryRequest(query=test_case["query"], user_profile=user_profile)
         
-        # Call the recommendation endpoint
-        print("  -> Calling get_recommendation...")
+        # Llamar endpoint
         response = get_recommendation(request)
-        print(f"     Response type: {type(response)}")
-        print(f"     Response keys: {response.keys() if isinstance(response, dict) else 'N/A'}")
         
-        # FastAPI returns a RecommendationResponse model, need to convert to dict
+        # Convertir a dict
         if hasattr(response, 'model_dump'):
             response = response.model_dump()
         elif hasattr(response, 'dict'):
             response = response.dict()
         
-        # Extract key data - response is a dict with 'response', 'plan', 'raw_data' keys
+        # Extraer datos clave
         plan = response['plan']
         plan_summary = plan.get('plan_summary', {})
         nutrition_summary = plan.get('nutrition_summary', {})
         weekly_calendar = plan.get('weekly_calendar', [])
         
-        print(f"  ✓ SUCCESS")
-        print(f"     Plan Title: {plan_summary.get('title', 'N/A')}")
-        print(f"     Goal Detected: {plan_summary.get('goal_detected', 'N/A')}")
-        print(f"     Days Generated: {len(weekly_calendar)}")
-        print(f"     Avg Daily Calories: {nutrition_summary.get('avg_daily_calories', 'N/A')} kcal")
-        print(f"     Avg Daily Protein: {nutrition_summary.get('avg_daily_protein_g', 'N/A')} g")
-        print(f"     Workout Options: {len(plan.get('workout_options', []))}")
-        print(f"     Recipe Options: {len(plan.get('meal_options', []))}")
+        print(f"  ✓ ÉXITO")
+        print(f"     Título del Plan: {plan_summary.get('title', 'N/A')}")
+        print(f"     Objetivo Detectado: {plan_summary.get('goal_detected', 'N/A')}")
+        print(f"     Días Generados: {len(weekly_calendar)}")
+        print(f"     Calorías Diarias Promedio: {nutrition_summary.get('avg_daily_calories', 'N/A')} kcal")
+        print(f"     Proteína Diaria Promedio: {nutrition_summary.get('avg_daily_protein_g', 'N/A')} g")
+        print(f"     Opciones de Ejercicio: {len(plan.get('workout_options', []))}")
+        print(f"     Opciones de Recetas: {len(plan.get('meal_options', []))}") 
         
         results.append({
             "test_name": test_case["name"],
@@ -142,22 +136,22 @@ for i, test_case in enumerate(test_cases, 1):
             "error": str(e)
         })
 
-# Save results
-output_file = "response.json"
+# Guardar resultados
+output_file = "response_new.json"
 print(f"\n{'=' * 80}")
-print(f"Saving results to {output_file}...")
+print(f"Guardando resultados en {output_file}...")
 
 with open(output_file, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 
-print(f"✓ Results saved to {output_file}")
+print(f"✓ Resultados guardados en {output_file}")
 
-# Summary
+# Resumen
 print(f"\n{'=' * 80}")
-print("SUMMARY")
+print("RESUMEN")
 print(f"{'=' * 80}")
 successful = sum(1 for r in results if r['status'] == 'success')
-print(f"Total tests: {len(results)}")
-print(f"Successful: {successful}")
-print(f"Failed: {len(results) - successful}")
+print(f"Total de pruebas: {len(results)}")
+print(f"Exitosas: {successful}")
+print(f"Fallidas: {len(results) - successful}")
 print(f"{'=' * 80}")
