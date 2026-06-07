@@ -106,6 +106,265 @@ BODY_PART_TO_MUSCLES = {
     "full_body": [],
 }
 
+# =====================================================================
+# WORKOUT / TRAINING-SPLIT RULES (Python-owned, deterministic)
+# Sources reviewed (current strength-training consensus):
+#   - Each major muscle group should be trained ~2-3x/week; twice-weekly
+#     beats once-weekly at equal volume (BodySpec, BiologyInsights,
+#     ScienceInsights, FitnessVolt 2025).
+#   - ~10-20 hard sets per muscle group per week; 2-4 sets per exercise.
+#   - Frequency drives the split: 3d full-body/PPL, 4d upper/lower,
+#     5-6d PPL or upper/lower repeats so muscles get hit ~2x.
+# Design: 6 resistance exercises per training day + goal-based cardio.
+#   A requested body part becomes a PRIORITY: it gets its own focus
+#   sessions ~2x/week (more slots), and the rest of the body is spread
+#   across the remaining days as a balanced split.
+# =====================================================================
+EXERCISES_PER_DAY = 6
+
+# Body-part group -> DB target_muscle values.
+MUSCLE_GROUPS = {
+    "chest": ["chest"],
+    "back": ["lats", "middle back", "lower back", "traps"],
+    "legs": ["quadriceps", "hamstrings", "glutes", "calves", "adductors", "abductors"],
+    "shoulders": ["shoulders"],
+    "arms": ["biceps", "triceps", "forearms"],
+    "core": ["abdominals"],
+}
+
+# 6 muscle "slots" per training day (repeats = more volume for that muscle).
+THEME_SLOTS = {
+    "push":      ["chest", "chest", "shoulders", "shoulders", "triceps", "triceps"],
+    "pull":      ["lats", "middle back", "traps", "biceps", "biceps", "forearms"],
+    "legs":      ["quadriceps", "quadriceps", "hamstrings", "glutes", "calves", "abdominals"],
+    "upper":     ["chest", "shoulders", "lats", "middle back", "biceps", "triceps"],
+    "lower":     ["quadriceps", "hamstrings", "glutes", "calves", "adductors", "abdominals"],
+    "full_body": ["quadriceps", "chest", "lats", "shoulders", "hamstrings", "abdominals"],
+    "core":      ["abdominals", "abdominals", "lower back", "glutes", "quadriceps", "calves"],
+}
+
+THEME_LABEL = {
+    "push": "Push (Chest, Shoulders, Triceps)",
+    "pull": "Pull (Back, Biceps)",
+    "legs": "Legs",
+    "upper": "Upper Body",
+    "lower": "Lower Body",
+    "full_body": "Full Body",
+    "core": "Core & Abs",
+}
+
+# Frequency -> ordered day themes (chosen so muscles recur ~2x at higher freq).
+SPLIT_TEMPLATES = {
+    1: ["full_body"],
+    2: ["upper", "lower"],
+    3: ["push", "pull", "legs"],
+    4: ["upper", "lower", "push", "pull"],
+    5: ["push", "pull", "legs", "upper", "lower"],
+    6: ["push", "pull", "legs", "push", "pull", "legs"],
+    7: ["push", "pull", "legs", "upper", "lower", "full_body", "core"],
+}
+
+# Cardio minutes per training day by goal (DB is strength-only, so cardio
+# is expressed as a duration recommendation, not a retrieved exercise).
+CARDIO_MIN_BY_GOAL = {
+    "weight_loss": 25,
+    "recomp": 20,
+    "muscle_gain": 10,
+    "maintenance": 15,
+}
+CARDIO_NOTE_BY_GOAL = {
+    "weight_loss": "Finish with ~25 min moderate cardio (incline walk, cycling, or rower) to support the deficit.",
+    "recomp": "Add ~20 min moderate cardio to support recomposition without hurting recovery.",
+    "muscle_gain": "Keep cardio light (~10 min) to preserve energy for lifting and recovery.",
+    "maintenance": "Add ~15 min steady cardio for cardiovascular health.",
+}
+
+SUPPORT_POOL = [
+    "abdominals", "chest", "lats", "shoulders", "quadriceps",
+    "biceps", "triceps", "hamstrings", "glutes", "calves",
+]
+
+
+def _spread_indices(num_days, count):
+    """Evenly spread `count` picks across `num_days` (e.g. training vs rest)."""
+    count = max(0, min(count, num_days))
+    if count == 0:
+        return []
+    if count >= num_days:
+        return list(range(num_days))
+    if count == 1:
+        return [0]
+    return sorted(set(round(i * (num_days - 1) / (count - 1)) for i in range(count)))
+
+
+def fetch_exercises_by_muscle(muscles, per_muscle=120):
+    """Reliably fetch exercises for each muscle via an exact term query so a
+    requested body part is ALWAYS represented (fixes 'asked for back, got none').
+    Real training movements (with equipment) are ranked ahead of bodyweight
+    stretch/mobility entries so the plan reads like a real workout."""
+    # Stretch/mobility entries to push to the back of each bucket.
+    mobility_terms = ("stretch", "smr", "circle", "mobility", "foam", "warm",
+                      "dynamic", "static", "iytw", "pnf")
+    quality_equipment = ("barbell", "dumbbell", "cable", "machine", "kettlebell",
+                         "e-z curl bar", "bands")
+
+    def score(ex):
+        name = (ex.get("name") or "").lower()
+        equip = (ex.get("equipment") or "").lower()
+        s = 0
+        if any(t in name for t in mobility_terms):
+            s -= 10            # demote stretches/mobility
+        if equip in quality_equipment:
+            s += 3             # prefer loaded movements
+        if equip in ("body only", "none", ""):
+            s -= 1
+        return s
+
+    buckets = {}
+    for m in set(muscles):
+        try:
+            resp = es_client.search(index="exercises", body={
+                "size": per_muscle,
+                "query": {"term": {"target_muscle": m}},
+            })
+            docs = [dict(h["_source"]) for h in resp["hits"]["hits"]]
+            docs.sort(key=score, reverse=True)
+            buckets[m] = docs
+        except Exception as e:
+            print(f"[ES WARN] muscle fetch '{m}' failed: {e}")
+            buckets[m] = []
+    return buckets
+
+
+def _focus_day_slots(focus_muscles, support_muscles, support_offset=0):
+    """A focus session: 4 slots for the focus muscles + 2 supporting slots.
+    support_offset rotates which support muscles appear (variety across weeks)."""
+    slots = [focus_muscles[i % len(focus_muscles)] for i in range(4)]
+    if support_muscles:
+        slots += [support_muscles[(support_offset + i) % len(support_muscles)] for i in range(2)]
+    while len(slots) < EXERCISES_PER_DAY:
+        slots.append(focus_muscles[len(slots) % len(focus_muscles)])
+    return slots[:EXERCISES_PER_DAY]
+
+
+def build_workout_week(num_days, training_freq, target_groups, goal_type):
+    """Deterministically build the weekly split.
+    Returns (workout_options, per_day) where per_day[i] is a dict with
+    is_rest_day, focus, exercise_indices, duration_min, cardio_min, cardio_note."""
+    training_freq = max(1, min(training_freq, num_days))
+    training_idxs = set(_spread_indices(num_days, training_freq))
+
+    # Resolve focus muscles from requested body-part groups (ignore non-muscle).
+    focus_groups = [g for g in (target_groups or []) if g in MUSCLE_GROUPS]
+    focus_muscles = []
+    for g in focus_groups:
+        for m in MUSCLE_GROUPS[g]:
+            if m not in focus_muscles:
+                focus_muscles.append(m)
+
+    # Build the theme (muscle slots) for each TRAINING day position.
+    day_themes = []  # list of (focus_label, [6 muscles])
+    if focus_muscles:
+        # Focus appears ~2x/week (3x at high frequency), spread out.
+        n_focus = 1 if training_freq <= 1 else (3 if training_freq >= 6 else 2)
+        n_focus = min(n_focus, training_freq)
+        focus_positions = set(_spread_indices(training_freq, n_focus))
+        support_muscles = [m for m in SUPPORT_POOL if m not in focus_muscles]
+        focus_label = " & ".join(g.title() for g in focus_groups)
+        # Residual themes cover the REST of the body on non-focus days.
+        residual = [t for t in ["legs", "pull", "push", "lower", "upper", "core"]
+                    if sum(1 for s in THEME_SLOTS[t] if s in focus_muscles) <= 3]
+        if not residual:
+            residual = ["legs", "pull", "push"]
+        res_i = 0
+        focus_seen = 0
+        for pos in range(training_freq):
+            if pos in focus_positions:
+                day_themes.append((f"{focus_label} (Priority)", _focus_day_slots(focus_muscles, support_muscles, support_offset=focus_seen * 2)))
+                focus_seen += 1
+            else:
+                t = residual[res_i % len(residual)]
+                res_i += 1
+                day_themes.append((THEME_LABEL[t], THEME_SLOTS[t]))
+    else:
+        base = SPLIT_TEMPLATES.get(training_freq, SPLIT_TEMPLATES[3])
+        themes = [base[i % len(base)] for i in range(training_freq)]
+        day_themes = [(THEME_LABEL[t], THEME_SLOTS[t]) for t in themes]
+
+    # Fetch exercise candidates for every muscle we will use.
+    needed = set()
+    for _, slots in day_themes:
+        needed.update(slots)
+    buckets = fetch_exercises_by_muscle(list(needed))
+
+    # Assign exercises with rotation (variety across days) + per-day uniqueness.
+    pointers = {m: 0 for m in buckets}
+
+    def pick_unique(muscle, used_ids):
+        pool = buckets.get(muscle) or []
+        if not pool:
+            # Fallback: borrow from any non-empty bucket.
+            for mm, pl in buckets.items():
+                if pl:
+                    pool = pl
+                    muscle = mm
+                    break
+        if not pool:
+            return None
+        for _ in range(len(pool)):
+            ex = pool[pointers[muscle] % len(pool)]
+            pointers[muscle] += 1
+            if ex.get("id") not in used_ids:
+                return ex
+        return None  # all exhausted (rare)
+
+    selected = []           # unique exercises across the week
+    id_to_index = {}
+    cardio_min = CARDIO_MIN_BY_GOAL.get(goal_type, 15)
+    cardio_note = CARDIO_NOTE_BY_GOAL.get(goal_type, "")
+
+    per_day = []
+    t_pos = 0
+    for d in range(num_days):
+        if d not in training_idxs:
+            # Rest / active recovery; light cardio only when cutting.
+            rest_cardio = 20 if goal_type == "weight_loss" else 0
+            per_day.append({
+                "is_rest_day": True,
+                "focus": "Rest Day / Active Recovery",
+                "exercise_indices": [],
+                "duration_min": rest_cardio,
+                "cardio_min": rest_cardio,
+                "cardio_note": "Light walk or mobility work." if rest_cardio else "Rest, hydrate, and prioritize sleep.",
+            })
+            continue
+
+        focus_label, slots = day_themes[t_pos]
+        t_pos += 1
+        used_ids = set()
+        indices = []
+        for muscle in slots:
+            ex = pick_unique(muscle, used_ids)
+            if not ex:
+                continue
+            used_ids.add(ex.get("id"))
+            if ex.get("id") not in id_to_index:
+                id_to_index[ex["id"]] = len(selected)
+                selected.append(ex)
+            indices.append(id_to_index[ex["id"]])
+
+        per_day.append({
+            "is_rest_day": False,
+            "focus": focus_label,
+            "exercise_indices": indices,
+            "duration_min": len(indices) * 8 + cardio_min,
+            "cardio_min": cardio_min,
+            "cardio_note": cardio_note,
+        })
+
+    workout_options = [format_exercise(ex) for ex in selected]
+    return workout_options, per_day
+
 WORD_TO_NUM = {
     "one": 1, "two": 2, "three": 3, "four": 4,
     "five": 5, "six": 6, "seven": 7,
@@ -613,14 +872,11 @@ def get_recommendation(request: QueryRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating embedding: {str(e)}")
 
-    # Exercises: enrich query with the requested body parts for better recall.
-    ex_query = request.query
-    if target_body_parts:
-        ex_query = f"{request.query} {' '.join(target_body_parts)} exercises strength training"
-    ex_vector = model.encode(ex_query).tolist()
-    exercise_pool = search_elasticsearch("exercises", ex_vector, k=40)
-    selected_exercises = select_exercises(exercise_pool, target_muscles, total=14)
-    workout_options = [format_exercise(ex) for ex in selected_exercises]
+    # Exercises: build a deterministic weekly split (Python-owned).
+    # The DB is strength-only; cardio is expressed as a per-day duration.
+    workout_options, workout_per_day = build_workout_week(
+        num_days, training_freq, target_body_parts, goal_type
+    )
     workout_summary = [
         {'index': i, 'name': ex['name'], 'target': ex['target_muscle'], 'equipment': ex['equipment']}
         for i, ex in enumerate(workout_options)
@@ -711,19 +967,18 @@ AVAILABLE RESOURCES:
 STRICT RULES:
 1. ALWAYS respond in ENGLISH.
 2. Generate EXACTLY {num_days} day object(s) in "weekly_calendar". No more, no less.
-3. Exactly {training_freq} of those days are TRAINING days (workout with exercises). The remaining days are REST days: set "is_rest_day": true, "exercise_indices": [], focus "Rest Day / Active Recovery".
-4. WORKOUTS: prioritize the focus body part(s): {body_focus_text}. Give them more exercises and weekly volume, but keep the overall routine balanced (include other muscle groups and core across the week). If the focus is "balanced full body", spread exercises evenly.
-5. Use ONLY recipe indices 0-{len(catalog_summary)-1} and exercise indices 0-{len(workout_options)-1}. Never invent items or numbers.
-6. MEAL LOGIC (use common sense):
+3. The WORKOUT for each day is built separately by the system. You ONLY plan MEALS. Do NOT include a "workout" key. Match the day order: day 1 = "Monday", etc.
+4. Use ONLY recipe indices 0-{len(catalog_summary)-1}. Never invent items or numbers.
+5. MEAL LOGIC (use common sense):
    - Breakfast must use breakfast-appropriate recipes (meal_hint "breakfast" preferred).
    - Lunch and Dinner use full "main" meals; do NOT put breakfast-only foods at dinner unless requested.
    - Snacks must be light/simple: prefer recipes with "snack_friendly": true (low calories, few ingredients, low prep time). Never assign a heavy full meal as a snack.
    - NEVER repeat the same recipe twice in the SAME day.
    - Unless meal-prep style is YES, do NOT repeat the exact same Breakfast or Dinner across all days; vary them.
-7. MACRO DISTRIBUTION: a meal may combine 1-3 recipes (e.g., main dish + side, pancakes + eggs, smoothie + toast). Put 2-3 indices in "recipe_indices" with matching "portion_multipliers" when it helps hit the daily targets. Adjust portion_multipliers (0.5, 1.0, 1.5, 2.0) to land near the targets.
-8. CONSISTENCY: keep daily calories and macros similar across days. The difference between the highest and lowest day must stay under 15%.
-9. Include 2-3 snacks per day for balanced nutrition.
-10. DO NOT include daily_totals (Python recalculates them). DO NOT mention calorie or macro numbers in any text field.
+6. MACRO DISTRIBUTION: a meal may combine 1-3 recipes (e.g., main dish + side, pancakes + eggs, smoothie + toast). Put 2-3 indices in "recipe_indices" with matching "portion_multipliers" when it helps hit the daily targets. Adjust portion_multipliers (0.5, 1.0, 1.5, 2.0) to land near the targets.
+7. CONSISTENCY: keep daily calories and macros similar across days. The difference between the highest and lowest day must stay under 15%.
+8. Include 2-3 snacks per day for balanced nutrition.
+9. DO NOT include daily_totals (Python recalculates them). DO NOT mention calorie or macro numbers in any text field.
 
 Return ONLY this exact JSON (ALL IN ENGLISH):
 {{
@@ -740,7 +995,6 @@ Return ONLY this exact JSON (ALL IN ENGLISH):
   "weekly_calendar": [
     {{
       "day": "Monday",
-      "is_rest_day": false,
       "meals": [
         {{"meal_type": "Breakfast", "recipe_indices": [0], "portion_multipliers": [1.5]}},
         {{"meal_type": "Morning Snack", "recipe_indices": [3], "portion_multipliers": [1.0]}},
@@ -748,7 +1002,6 @@ Return ONLY this exact JSON (ALL IN ENGLISH):
         {{"meal_type": "Afternoon Snack", "recipe_indices": [2], "portion_multipliers": [1.0]}},
         {{"meal_type": "Dinner", "recipe_indices": [12], "portion_multipliers": [1.5]}}
       ],
-      "workout": {{"exercise_indices": [0,1,2,3], "focus": "Chest & Shoulders", "duration_min": 45}},
       "notes": "Short tip in English without mentioning specific numbers"
     }}
   ],
@@ -764,10 +1017,7 @@ Return ONLY this exact JSON (ALL IN ENGLISH):
     full_prompt = f"""{llm_prompt}
 
 RECIPE DATABASE (index 0-{len(catalog_summary)-1}):
-{json.dumps(catalog_summary, indent=1)}
-
-WORKOUT DATABASE (index 0-{len(workout_options)-1}):
-{json.dumps(workout_summary, indent=1)}"""
+{json.dumps(catalog_summary, indent=1)}"""
 
     try:
         chat_completion = openai_client.chat.completions.create(
@@ -790,15 +1040,30 @@ WORKOUT DATABASE (index 0-{len(workout_options)-1}):
         weekly_calendar, target_calories, target_protein_g, catalog
     )
 
-    # Python is the single source of truth for daily_totals.
+    # Python is the single source of truth for daily_totals AND workouts.
     recalculated_days = validation_result.get('recalculated_days', [])
+    day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     for i, day in enumerate(weekly_calendar):
+        day['day'] = day.get('day') or (day_names[i] if i < 7 else f"Day {i+1}")
         day['daily_totals'] = (
             recalculated_days[i]
             if i < len(recalculated_days)
             else {'calories': 0, 'protein_g': 0.0, 'carbs_g': 0.0, 'fats_g': 0.0}
         )
-        day.setdefault('is_rest_day', len(day.get('workout', {}).get('exercise_indices', [])) == 0)
+        # Inject the deterministic Python-built workout for this day.
+        wd = workout_per_day[i] if i < len(workout_per_day) else None
+        if wd:
+            day['is_rest_day'] = wd['is_rest_day']
+            day['workout'] = {
+                "exercise_indices": wd['exercise_indices'],
+                "focus": wd['focus'],
+                "duration_min": wd['duration_min'],
+                "cardio_min": wd['cardio_min'],
+                "cardio_note": wd['cardio_note'],
+            }
+        else:
+            day.setdefault('is_rest_day', True)
+            day.setdefault('workout', {"exercise_indices": [], "focus": "Rest Day", "duration_min": 0, "cardio_min": 0, "cardio_note": ""})
 
     ai_recommendations = llm_data.get('ai_recommendations', {})
     if safety_warnings:
@@ -853,5 +1118,10 @@ WORKOUT DATABASE (index 0-{len(workout_options)-1}):
     return {
         "response": json.dumps(complete_plan, ensure_ascii=False),
         "plan": complete_plan,
-        "raw_data": {"exercises": selected_exercises, "recipes": diverse_recipes},
+        "raw_data": {"exercises": workout_options, "recipes": diverse_recipes},
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
