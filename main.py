@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import re
+import math
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -463,6 +464,8 @@ def detect_macro_prefs(q):
 # Common food/ingredient words we can recognize in free-text requests.
 # Plurals/variants are handled by substring matching against the recipe text.
 KNOWN_INGREDIENTS = [
+    "protein powder", "whey protein", "whey", "casein", "protein shake",
+    "peanut butter", "almond butter", "cottage cheese", "soy sauce", "olive oil",
     "chicken", "beef", "pork", "lamb", "turkey", "duck", "bacon", "ham", "sausage",
     "fish", "salmon", "tuna", "shrimp", "prawn", "crab", "lobster", "cod", "tilapia",
     "egg", "eggs", "milk", "cheese", "yogurt", "butter", "cream", "feta", "mozzarella",
@@ -492,6 +495,128 @@ ES_INGREDIENT_MAP = {
     "miel": "honey", "platano": "banana", "manzana": "apple", "fresa": "strawberry",
     "naranja": "orange", "limon": "lemon", "coco": "coconut", "jengibre": "ginger",
 }
+
+
+# Synonyms / related terms so an exclusion blocks ALL variants (NLP-style).
+# Excluding the key blocks every term in its list (and the key itself).
+INGREDIENT_SYNONYMS = {
+    "protein powder": ["protein powder", "whey", "whey protein", "protein isolate",
+                        "whey isolate", "casein", "protein shake", "protein scoop",
+                        "scoop of protein", "isolate", "mass gainer", "proteina en polvo",
+                        "suero de leche", "protein blend", "plant protein", "pea protein"],
+    "dairy": ["milk", "cheese", "yogurt", "yoghurt", "butter", "cream", "feta",
+              "mozzarella", "ricotta", "parmesan", "cottage cheese", "whey", "casein"],
+    "nuts": ["nuts", "peanut", "peanuts", "almond", "almonds", "walnut", "walnuts",
+             "cashew", "cashews", "pecan", "pistachio", "hazelnut", "nut butter",
+             "peanut butter", "almond butter"],
+    "shellfish": ["shellfish", "shrimp", "prawn", "prawns", "crab", "lobster",
+                  "clam", "mussel", "oyster", "scallop"],
+    "fish": ["fish", "salmon", "tuna", "cod", "tilapia", "sole", "trout", "sardine",
+             "anchovy", "halibut", "sea bass", "mackerel"],
+    "pork": ["pork", "bacon", "ham", "sausage", "chorizo", "prosciutto"],
+    "beef": ["beef", "steak", "ground beef", "sirloin", "brisket"],
+    "chicken": ["chicken", "poultry"],
+    "egg": ["egg", "eggs", "egg white", "egg yolk", "egg substitute", "egg beaters"],
+    "gluten": ["gluten", "wheat", "flour", "bread", "pasta", "barley", "rye"],
+    "sugar": ["sugar", "brown sugar", "syrup", "honey", "agave"],
+    "soy": ["soy", "soya", "tofu", "edamame", "soy sauce", "tempeh"],
+    "onion": ["onion", "onions", "scallion", "scallions", "shallot", "shallots", "leek", "leeks"],
+    "garlic": ["garlic"],
+    "mushroom": ["mushroom", "mushrooms", "shiitake", "portobello", "chanterelle"],
+}
+
+
+def _expand_excluded_terms_static(excluded):
+    """Static, offline synonym expansion using the hardcoded INGREDIENT_SYNONYMS
+    map. Always available — this is the allergy-safety floor that never depends
+    on a network call."""
+    terms = set()
+    for ing in excluded:
+        ing = ing.strip().lower()
+        if not ing:
+            continue
+        terms.add(ing)
+        if ing in INGREDIENT_SYNONYMS:
+            terms.update(t.lower() for t in INGREDIENT_SYNONYMS[ing])
+        for key, group in INGREDIENT_SYNONYMS.items():
+            if ing == key or ing in group or any(ing in g or g in ing for g in group):
+                terms.add(key)
+                terms.update(t.lower() for t in group)
+    return terms
+
+
+# Cache LLM synonym lookups so repeat requests are cheap and deterministic.
+_SYNONYM_CACHE = {}
+
+
+def _llm_synonyms(excluded):
+    """Ask the LLM to map each excluded ingredient to its synonyms / related
+    surface forms found in recipe ingredient lists. Strict guardrails:
+      - temperature 0 + JSON-only response_format (deterministic, same shape)
+      - a fixed schema we validate; anything malformed is discarded
+      - only short, lowercase, alphabetic food terms are kept (anti-hallucination)
+      - results are merged with the static map, never used alone
+    Returns a set of extra terms (may be empty on any failure)."""
+    key = tuple(sorted(t.strip().lower() for t in excluded if t.strip()))
+    if not key:
+        return set()
+    if key in _SYNONYM_CACHE:
+        return _SYNONYM_CACHE[key]
+
+    prompt = (
+        "You expand food-exclusion terms for an allergy-safe meal filter. "
+        "For each ingredient the user wants to AVOID, list other names, brands, "
+        "and closely related forms that appear in recipe ingredient lists. "
+        "Rules: only real food/ingredient words; lowercase; no phrases longer "
+        "than 3 words; no explanations; do NOT invent unrelated foods. "
+        "Return ONLY JSON of the exact shape: "
+        '{"terms": ["term1", "term2", ...]}.\n'
+        f"Ingredients to avoid: {', '.join(key)}"
+    )
+    try:
+        resp = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+            max_tokens=300,
+            response_format={"type": "json_object"},
+        )
+        data = json.loads(resp.choices[0].message.content)
+        raw = data.get("terms", [])
+        if not isinstance(raw, list):
+            _SYNONYM_CACHE[key] = set()
+            return set()
+        clean = set()
+        # Generic tokens that would over-match and wrongly remove safe recipes.
+        too_generic = {"protein", "powder", "oil", "sauce", "spice", "spices",
+                       "seasoning", "food", "meat", "drink", "supplement", "flavor",
+                       "mix", "blend", "extract", "natural", "organic"}
+        for t in raw:
+            if not isinstance(t, str):
+                continue
+            t = t.strip().lower()
+            # Guardrails: short, alphabetic (spaces allowed), <=3 words, not generic.
+            if (t and len(t) <= 30 and len(t.split()) <= 3
+                    and re.fullmatch(r"[a-z ]+", t) and t not in too_generic):
+                clean.add(t)
+        _SYNONYM_CACHE[key] = clean
+        return clean
+    except Exception as e:
+        print(f"[synonyms] LLM expansion failed, using static map only: {e}")
+        _SYNONYM_CACHE[key] = set()
+        return set()
+
+
+def expand_excluded_terms(excluded, use_llm=True):
+    """Expand excluded ingredients into all synonyms/related terms so e.g.
+    'protein powder' also blocks 'whey', 'casein', 'isolate'.
+    Combines the hardcoded safety map (always) with optional LLM expansion
+    (extra coverage). The static map guarantees allergy safety even if the LLM
+    call fails or is disabled."""
+    terms = _expand_excluded_terms_static(excluded)
+    if use_llm and excluded:
+        terms |= _llm_synonyms(excluded)
+    return terms
 
 
 def _find_ingredients(text):
@@ -559,16 +684,25 @@ def recipe_contains_ingredient(recipe, ingredient):
 
 
 def filter_excluded(recipes, excluded):
-    """Remove every recipe that contains ANY excluded ingredient.
-    Hard filter — allergy safety, no exceptions."""
+    """Remove every recipe that contains ANY excluded ingredient OR a synonym
+    of it (allergy safety, hard filter). 'no protein powder' also removes whey,
+    casein, isolate, protein shake, etc."""
     if not excluded:
         return recipes
+    terms = expand_excluded_terms(excluded)
     out = []
     for r in recipes:
-        if any(recipe_contains_ingredient(r, ing) for ing in excluded):
+        blob = f"{r.get('name','')} {r.get('ingredients','')}".lower()
+        if any(re.search(rf'\b{re.escape(t)}s?\b', blob) for t in terms):
             continue
         out.append(r)
     return out
+
+
+def catalog_item_excluded(item, excluded_terms):
+    """Final-catalog safety check using already-expanded synonym terms."""
+    blob = f"{item.get('recipe_name','')} {item.get('ingredients','')}".lower()
+    return any(re.search(rf'\b{re.escape(t)}s?\b', blob) for t in excluded_terms)
 
 
 class UserProfile(BaseModel):
@@ -1085,12 +1219,37 @@ def meal_hint_for(name, snack_friendly):
     return "main"
 
 
+def normalize_to_serving(cal, pro, carbs, fats):
+    """FatSecret recipes often store WHOLE-RECIPE totals (several servings), so a
+    single 'serving' can show e.g. 596 kcal / 117 g protein (~3 real servings).
+    Scale every macro down by a single factor so ONE serving is realistic:
+      - protein per serving <= ~45 g (a large chicken breast is ~45 g)
+      - calories per serving <= ~700 kcal (a big single meal)
+    Dividing all macros by the same factor preserves the recipe's macro ratios.
+    """
+    if cal <= 0:
+        return cal, pro, carbs, fats, 1
+    factor = max(
+        1,
+        math.ceil(pro / 45.0) if pro > 45 else 1,
+        math.ceil(cal / 700.0) if cal > 700 else 1,
+    )
+    if factor <= 1:
+        return cal, pro, carbs, fats, 1
+    return (cal / factor, pro / factor, carbs / factor, fats / factor, factor)
+
+
 def format_recipe_with_portions(recipe):
     base_macros = recipe.get('macros', {})
-    base_cal = base_macros.get('calories', 0)
-    base_pro = base_macros.get('protein_g', 0)
-    base_carbs = base_macros.get('carbs_g', 0)
-    base_fats = base_macros.get('fats_g', 0)
+    raw_cal = base_macros.get('calories', 0) or 0
+    raw_pro = base_macros.get('protein_g', 0) or 0
+    raw_carbs = base_macros.get('carbs_g', 0) or 0
+    raw_fats = base_macros.get('fats_g', 0) or 0
+    # Normalize multi-serving recipe totals down to ONE realistic serving.
+    base_cal, base_pro, base_carbs, base_fats, serving_factor = normalize_to_serving(
+        raw_cal, raw_pro, raw_carbs, raw_fats
+    )
+    base_cal = int(round(base_cal))
     ingredients = recipe.get('ingredients', '') or ''
     ingredient_count = len([x for x in ingredients.split(',') if x.strip()]) if ingredients else 0
     prep = recipe.get('ready_in_minutes', 30) or 30
@@ -1101,6 +1260,7 @@ def format_recipe_with_portions(recipe):
         "recipe_name": recipe.get('name', ''),
         "ready_in_minutes": prep,
         "ingredient_count": ingredient_count,
+        "servings_per_recipe": serving_factor,
         "diet_tags": recipe.get('diets', []),
         "base_calories": base_cal,
         "base_protein_g": round(base_pro, 1),
@@ -1391,12 +1551,11 @@ def get_recommendation(request: QueryRequest):
         diverse_recipes = diversify_by_name(pool, limit=30)
     catalog = [format_recipe_with_portions(r) for r in diverse_recipes]
 
-    # Final safety net: ensure no excluded ingredient slipped into the catalog.
+    # Final safety net: ensure no excluded ingredient (or synonym) slipped into
+    # the catalog. Uses the SAME expanded synonym terms as the pool filter.
     if excluded_ingredients:
-        catalog = [c for c in catalog
-                   if not any(re.search(rf'\b{re.escape(ing)}s?\b',
-                                        f"{c['recipe_name']} {c['ingredients']}".lower())
-                              for ing in excluded_ingredients)]
+        _excl_terms = expand_excluded_terms(excluded_ingredients)
+        catalog = [c for c in catalog if not catalog_item_excluded(c, _excl_terms)]
 
     if not catalog:
         raise HTTPException(status_code=503, detail="No recipes with nutrition data are currently available.")
