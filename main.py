@@ -460,6 +460,117 @@ def detect_macro_prefs(q):
     return prefs
 
 
+# Common food/ingredient words we can recognize in free-text requests.
+# Plurals/variants are handled by substring matching against the recipe text.
+KNOWN_INGREDIENTS = [
+    "chicken", "beef", "pork", "lamb", "turkey", "duck", "bacon", "ham", "sausage",
+    "fish", "salmon", "tuna", "shrimp", "prawn", "crab", "lobster", "cod", "tilapia",
+    "egg", "eggs", "milk", "cheese", "yogurt", "butter", "cream", "feta", "mozzarella",
+    "garlic", "onion", "onions", "tomato", "tomatoes", "potato", "potatoes", "rice",
+    "pasta", "noodles", "bread", "oats", "quinoa", "beans", "lentils", "chickpeas",
+    "tofu", "mushroom", "mushrooms", "spinach", "broccoli", "cauliflower", "carrot",
+    "carrots", "pepper", "peppers", "avocado", "corn", "peas", "cucumber", "lettuce",
+    "peanut", "peanuts", "almond", "almonds", "walnut", "nuts", "cashew", "pecan",
+    "shellfish", "soy", "gluten", "wheat", "sugar", "honey", "cilantro", "celery",
+    "banana", "apple", "berries", "strawberry", "orange", "lemon", "lime", "coconut",
+    "olive", "ginger", "chili", "cinnamon", "basil", "oregano", "parsley",
+]
+
+# Spanish -> English ingredient map so ES requests work too.
+ES_INGREDIENT_MAP = {
+    "pollo": "chicken", "carne": "beef", "res": "beef", "cerdo": "pork", "puerco": "pork",
+    "cordero": "lamb", "pavo": "turkey", "tocino": "bacon", "jamon": "ham",
+    "pescado": "fish", "salmon": "salmon", "atun": "tuna", "camaron": "shrimp", "camarones": "shrimp",
+    "huevo": "egg", "huevos": "eggs", "leche": "milk", "queso": "cheese", "yogur": "yogurt",
+    "mantequilla": "butter", "crema": "cream", "ajo": "garlic", "cebolla": "onion",
+    "tomate": "tomato", "jitomate": "tomato", "papa": "potato", "papas": "potato", "patata": "potato",
+    "arroz": "rice", "pasta": "pasta", "pan": "bread", "avena": "oats", "frijol": "beans",
+    "frijoles": "beans", "lenteja": "lentils", "lentejas": "lentils", "champiñon": "mushroom",
+    "champiñones": "mushrooms", "espinaca": "spinach", "brocoli": "broccoli", "zanahoria": "carrot",
+    "aguacate": "avocado", "maiz": "corn", "cacahuate": "peanut", "cacahuates": "peanuts",
+    "almendra": "almond", "nuez": "walnut", "nueces": "nuts", "soya": "soy", "azucar": "sugar",
+    "miel": "honey", "platano": "banana", "manzana": "apple", "fresa": "strawberry",
+    "naranja": "orange", "limon": "lemon", "coco": "coconut", "jengibre": "ginger",
+}
+
+
+def _find_ingredients(text):
+    """Return the set of known ingredient words present in a text fragment."""
+    found = set()
+    for ing in KNOWN_INGREDIENTS:
+        if re.search(rf'\b{re.escape(ing)}\b', text):
+            found.add(ing)
+    for es, en in ES_INGREDIENT_MAP.items():
+        if re.search(rf'\b{re.escape(es)}\b', text):
+            found.add(en)
+    return found
+
+
+def detect_ingredient_prefs(q):
+    """Parse explicit ingredient include/exclude requests from the query.
+    Returns (excluded, included). Exclusions are SAFETY-CRITICAL (allergies):
+    handles 'no/without/avoid/don't include/allergic to/free of X', EN + ES.
+    Inclusions handle 'with/include/lots of/as much X as possible'.
+    """
+    excluded, included = [], []
+
+    # --- exclusion phrases: capture a SHORT fragment after the trigger ---
+    # The fragment is length-bounded and stops at clause boundaries (pronouns/
+    # verbs) so short lists like "peanuts and shellfish" or "garlic, onion" are
+    # captured, but it won't run away into a separate clause like
+    # "...and I want fish". _find_ingredients extracts known foods from it.
+    STOP = r"(?:\.|;|$|\bi\b|\bplease\b|\bbut\b|\bwith\b|\bwant\b|\binclude\b|\bquiero\b|\bpor favor\b|\bpero\b|\bcon\b)"
+    frag = r"([a-z][a-z, ]{0,40}?)"
+    exclude_patterns = [
+        rf"(?:no|without|avoid|skip|hold the|free of|free from|leave out|exclude|omit)\s+{frag}{STOP}",
+        rf"(?:do(?:n't| not)|cannot|can't)\s+(?:include|eat|use|have)\s+{frag}{STOP}",
+        rf"(?:allergic to|allergy to|intolerant to)\s+{frag}{STOP}",
+        rf"(?:sin)\s+{frag}{STOP}",
+        rf"(?:no\s+(?:incluir|incluyas|me gusta|puedo comer))\s+{frag}{STOP}",
+        rf"(?:soy\s+al[eé]rgico\s+a(?:l)?)\s+{frag}{STOP}",
+    ]
+    for pat in exclude_patterns:
+        for m in re.finditer(pat, q):
+            excluded.extend(_find_ingredients(m.group(1)))
+
+    # --- inclusion phrases ---
+    include_patterns = [
+        r"(?:with|include|including|add|using|use|lots of|plenty of|more)\s+([a-z, ]+?)(?:\.|,|;|$|\band\b|\bplease\b)",
+        r"([a-z, ]+?)\s+as much as possible",
+        r"(?:con|incluir|incluye|mucho|mucha|bastante)\s+([a-z, ]+?)(?:\.|,|;|$|\by\b)",
+        r"([a-z, ]+?)\s+lo m[aá]s posible",
+    ]
+    for pat in include_patterns:
+        for m in re.finditer(pat, q):
+            included.extend(_find_ingredients(m.group(1)))
+
+    # De-dupe; exclusions win over inclusions (safety first).
+    excluded = list(dict.fromkeys(excluded))
+    included = [i for i in dict.fromkeys(included) if i not in excluded]
+    return excluded, included
+
+
+def recipe_contains_ingredient(recipe, ingredient):
+    """True if the recipe text (name + ingredients) mentions the ingredient.
+    Uses word-boundary matching to avoid false hits (e.g. 'pea' in 'peanut')."""
+    blob = f"{recipe.get('name','')} {recipe.get('ingredients','')}".lower()
+    # Match the word and a simple plural form.
+    return bool(re.search(rf'\b{re.escape(ingredient)}s?\b', blob))
+
+
+def filter_excluded(recipes, excluded):
+    """Remove every recipe that contains ANY excluded ingredient.
+    Hard filter — allergy safety, no exceptions."""
+    if not excluded:
+        return recipes
+    out = []
+    for r in recipes:
+        if any(recipe_contains_ingredient(r, ing) for ing in excluded):
+            continue
+        out.append(r)
+    return out
+
+
 class UserProfile(BaseModel):
     age: int
     sex: str
@@ -724,6 +835,19 @@ def extract_intent(query):
     if "calories" not in pref_macros and goal_type == "weight_loss":
         macro_prefs.append(("calories", "low"))
 
+    # --- explicit ingredient include / exclude (allergy-safe) ---
+    excluded_ingredients, included_ingredients = detect_ingredient_prefs(q)
+    # Vegetarian/vegan diets imply meat exclusions for safety/consistency.
+    if "vegan" in restrictions:
+        for w in ["chicken", "beef", "pork", "fish", "salmon", "tuna", "shrimp", "turkey",
+                  "lamb", "egg", "eggs", "cheese", "milk", "yogurt", "butter", "honey"]:
+            if w not in excluded_ingredients:
+                excluded_ingredients.append(w)
+    elif "vegetarian" in restrictions:
+        for w in ["chicken", "beef", "pork", "fish", "salmon", "tuna", "shrimp", "turkey", "lamb"]:
+            if w not in excluded_ingredients:
+                excluded_ingredients.append(w)
+
     wants_weekly = num_days >= 7
 
     return {
@@ -736,6 +860,8 @@ def extract_intent(query):
         "wants_weekly_plan": wants_weekly,
         "meal_prep_style": meal_prep,
         "macro_prefs": macro_prefs,
+        "excluded_ingredients": excluded_ingredients,
+        "included_ingredients": included_ingredients,
         # kept for backward compatibility / convenience
         "high_protein": any(m == "protein" and d == "high" for m, d in macro_prefs),
     }
@@ -858,6 +984,56 @@ def rank_by_macro_prefs(recipes, macro_prefs):
         return s
 
     return sorted(recipes, key=score, reverse=True)
+
+
+def build_balanced_catalog(recipes, macro_prefs, limit=30):
+    """Build a catalog that PRIORITIZES the preferred macro but guarantees a
+    realistic balance of carb and fat sources, so the LLM can assemble
+    balanced days. Without this, a 'high protein' plan becomes all lean meat
+    and the day's protein blows past safe limits.
+
+    Strategy: rank by preference, then fill the catalog from three buckets:
+      ~60% preferred (e.g. protein-dense), and reserve slots for carb-rich and
+      fat/varied recipes so meals have something to pair protein with."""
+    if not recipes:
+        return []
+    ranked = rank_by_macro_prefs(recipes, macro_prefs)
+    ranked = diversify_by_name(ranked, limit=len(ranked))  # de-dupe by name
+
+    wants_low_carb = any(m == "carbs" and d == "low" for m, d in macro_prefs)
+
+    def carb_pct(r):
+        return macro_density(r, "carbs")
+
+    # Carb-rich recipes provide energy + variety to pair with lean protein.
+    carb_rich = [r for r in ranked if carb_pct(r) >= 0.30]
+
+    out, seen = [], set()
+    def add(r):
+        if r["id"] not in seen:
+            seen.add(r["id"]); out.append(r)
+
+    # Reserve carb slots unless the user explicitly wants low carb.
+    carb_quota = 0 if wants_low_carb else max(4, int(limit * 0.30))
+
+    # 1) Fill most of the catalog with the preference-ranked recipes.
+    primary_target = limit - carb_quota
+    for r in ranked:
+        if len(out) >= primary_target:
+            break
+        add(r)
+    # 2) Guarantee carb sources for balance.
+    if carb_quota:
+        for r in carb_rich:
+            if len(out) >= limit:
+                break
+            add(r)
+    # 3) Top up with anything remaining.
+    for r in ranked:
+        if len(out) >= limit:
+            break
+        add(r)
+    return out[:limit]
 
 
 def select_exercises(pool, target_muscles, total=14, focus_ratio=0.55):
@@ -1063,6 +1239,10 @@ def validate_nutrition_plan(daily_days, target_calories, target_protein_g, catal
         protein_sufficient = False
         shortfall_pct = int(((avg_pro - target_protein_g) / target_protein_g) * 100) if target_protein_g else 0
         warnings.append(f"Average protein below target: {avg_pro}g vs {target_protein_g}g ({shortfall_pct:+d}%).")
+    # Flag protein that overshoots the safe ceiling (>15% over target).
+    if target_protein_g and avg_pro > target_protein_g * 1.15:
+        over_pct = int(((avg_pro - target_protein_g) / target_protein_g) * 100)
+        warnings.append(f"Average protein above safe ceiling: {avg_pro}g vs {target_protein_g}g target ({over_pct:+d}%). Reduce protein portions and add carbs/fats.")
 
     # Weekly consistency: max-min spread per macro must stay < 15%.
     weekly_balance = {"balanced": True, "spreads": {}}
@@ -1137,6 +1317,8 @@ def get_recommendation(request: QueryRequest):
     }
     diet_text = " ".join(intent["dietary_restrictions"])
     macro_prefs = intent.get("macro_prefs", [])
+    excluded_ingredients = intent.get("excluded_ingredients", [])
+    included_ingredients = intent.get("included_ingredients", [])
 
     # Seed retrieval with REAL foods for any "high X" macro preference so the
     # candidate pool contains foods that actually satisfy the request (e.g.
@@ -1147,6 +1329,10 @@ def get_recommendation(request: QueryRequest):
             seed = MACRO_CONFIG.get(macro, {}).get("seed_high", "")
             if seed:
                 seed_terms.append(seed)
+    # Bias retrieval toward explicitly requested ingredients ("chicken as much
+    # as possible") so the pool is rich in them (still balanced later).
+    if included_ingredients:
+        seed_terms.append(" ".join(included_ingredients) + " " + " ".join(included_ingredients))
     if seed_terms:
         main_vec = model.encode(f"{request.query} {diet_text} {' '.join(seed_terms)}").tolist()
     else:
@@ -1161,18 +1347,56 @@ def get_recommendation(request: QueryRequest):
     snack_vec = model.encode(f"{request.query} {diet_text} {snack_hints.get(goal_type, 'healthy snacks')}").tolist()
     snack_recipes = search_elasticsearch("recipes", snack_vec, k=15, filter_zero_macros=True)
 
+    # Always pull some carb/complex-carb sources so the catalog is never starved
+    # of carbohydrates (otherwise a "high protein" plan becomes ALL meat and the
+    # day's macros are unbalanced and unrealistically high in protein).
+    carb_vec = model.encode(
+        f"{request.query} {diet_text} rice pasta potato quinoa oats whole grain beans sweet potato vegetables fruit"
+    ).tolist()
+    carb_recipes = search_elasticsearch("recipes", carb_vec, k=20, filter_zero_macros=True)
+
     merged = {}
-    for r in main_recipes + breakfast_recipes + snack_recipes:
+    for r in main_recipes + breakfast_recipes + snack_recipes + carb_recipes:
         merged[r['id']] = r
     pool = list(merged.values())
 
-    # Macro-aware ranking: order the pool by how well each recipe satisfies the
-    # user's macro preferences (real macro values), BEFORE trimming the catalog.
-    if macro_prefs:
-        pool = rank_by_macro_prefs(pool, macro_prefs)
+    # SAFETY-CRITICAL: hard-remove any recipe containing an excluded ingredient
+    # (allergies / dislikes). This happens BEFORE ranking so excluded foods can
+    # never appear in the plan.
+    if excluded_ingredients:
+        before = len(pool)
+        pool = filter_excluded(pool, excluded_ingredients)
+        print(f"[exclude] removed {before - len(pool)} recipes containing: {excluded_ingredients}")
 
-    diverse_recipes = diversify_by_name(pool, limit=30)
+    if not pool:
+        raise HTTPException(
+            status_code=422,
+            detail=f"No recipes available after excluding: {', '.join(excluded_ingredients)}. Try removing some restrictions.",
+        )
+
+    # Prioritize explicitly included ingredients (e.g. "chicken as much as
+    # possible") to the front of the pool, but keep variety so the plan still
+    # includes other proteins/foods for balance.
+    if included_ingredients:
+        preferred = [r for r in pool if any(recipe_contains_ingredient(r, ing) for ing in included_ingredients)]
+        others = [r for r in pool if r not in preferred]
+        # ~65% preferred, rest kept for balance/variety.
+        pool = preferred + others
+
+    # Build a BALANCED catalog. When the user prefers a macro we prioritize it,
+    # but we guarantee carb and fat sources remain so balanced meals are possible.
+    if macro_prefs:
+        diverse_recipes = build_balanced_catalog(pool, macro_prefs, limit=30)
+    else:
+        diverse_recipes = diversify_by_name(pool, limit=30)
     catalog = [format_recipe_with_portions(r) for r in diverse_recipes]
+
+    # Final safety net: ensure no excluded ingredient slipped into the catalog.
+    if excluded_ingredients:
+        catalog = [c for c in catalog
+                   if not any(re.search(rf'\b{re.escape(ing)}s?\b',
+                                        f"{c['recipe_name']} {c['ingredients']}".lower())
+                              for ing in excluded_ingredients)]
 
     if not catalog:
         raise HTTPException(status_code=503, detail="No recipes with nutrition data are currently available.")
@@ -1238,6 +1462,22 @@ def get_recommendation(request: QueryRequest):
     else:
         macro_rule = ""
 
+    # Ingredient include/exclude rules (exclude = allergy-safe, hard rule).
+    excluded_ingredients = intent.get("excluded_ingredients", [])
+    included_ingredients = intent.get("included_ingredients", [])
+    ingredient_rule = ""
+    if excluded_ingredients:
+        ingredient_rule += (
+            "\n   - FORBIDDEN INGREDIENTS (ALLERGY SAFETY - ABSOLUTE RULE): NEVER select any recipe "
+            "that contains " + ", ".join(excluded_ingredients) + ". If unsure, skip the recipe."
+        )
+    if included_ingredients:
+        ingredient_rule += (
+            "\n   - PREFERRED INGREDIENTS: the user wants " + ", ".join(included_ingredients) +
+            " as often as possible. Prioritize recipes featuring these, but keep variety with other "
+            "proteins/foods across the week for a balanced plan."
+        )
+
     llm_prompt = f"""You are a SENIOR NUTRITIONIST and CERTIFIED STRENGTH COACH. Build a realistic, professional, and personalized plan.
 
 USER PROFILE: {p.age}y {p.sex}, {p.weight_kg}kg, {p.height_cm}cm, BMI: {bmi:.1f}
@@ -1253,9 +1493,9 @@ EXTRACTED INTENT (already parsed for you, respect it exactly):
 - Repetitive meal-prep style: {meal_prep_text}
 
 INTERNAL DAILY TARGETS (use to choose portions, DO NOT mention any numbers in your text):
-- Calories: ~{target_calories} kcal/day
-- Protein: ~{target_protein_g} g/day
-- Carbs: ~{target_carbs_g} g/day
+- Calories: ~{target_calories} kcal/day (keep each day within +/-10%)
+- Protein: ~{target_protein_g} g/day. This is also a HARD CEILING — do NOT exceed {int(target_protein_g * 1.15)} g/day. Stop adding protein once you reach the target even if calories are still low; add carbs/fats instead.
+- Carbs: ~{target_carbs_g} g/day (use carb-rich recipes to reach calories without overshooting protein)
 - Fats: ~{target_fats_g} g/day
 
 AVAILABLE RESOURCES:
@@ -1272,7 +1512,7 @@ STRICT RULES:
    - Lunch and Dinner use full "main" meals; do NOT put breakfast-only foods at dinner unless requested.
    - Snacks must be light/simple: prefer recipes with "snack_friendly": true (low calories, few ingredients, low prep time). Never assign a heavy full meal as a snack.
    - NEVER repeat the same recipe twice in the SAME day.
-   - Unless meal-prep style is YES, do NOT repeat the exact same Breakfast or Dinner across all days; vary them.{macro_rule}
+   - Unless meal-prep style is YES, do NOT repeat the exact same Breakfast or Dinner across all days; vary them.{macro_rule}{ingredient_rule}
 6. MACRO DISTRIBUTION: a meal may combine 1-3 recipes (e.g., main dish + side, pancakes + eggs, smoothie + toast). Put 2-3 indices in "recipe_indices" with matching "portion_multipliers" when it helps hit the daily targets. Adjust portion_multipliers (0.5, 1.0, 1.5, 2.0) to land near the targets.
 7. CONSISTENCY: keep daily calories and macros similar across days. The difference between the highest and lowest day must stay under 15%.
 8. Include 2-3 snacks per day for balanced nutrition.
