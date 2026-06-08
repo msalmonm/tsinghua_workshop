@@ -638,7 +638,34 @@ def extract_intent(query):
         num_days = 7
 
     # --- training frequency (workout days per week) ---
+    # DEFAULT: train EVERY day (no rest) unless the user says otherwise.
+    # Honors: explicit frequency ("5 days a week"), explicit rest days
+    # ("2 rest days"), and "no/avoid rest days" / "every day".
     training_freq = None
+
+    # Explicit "avoid/no rest days" or "every day" -> train all days.
+    no_rest = bool(re.search(
+        r'\b(no rest days?|without rest days?|avoid rest days?|skip rest days?|'
+        r'every day|everyday|daily|all days?|sin d[ií]as? de descanso|todos los d[ií]as)\b', q
+    ))
+
+    # Explicit number of REST days requested -> derive training days.
+    rest_days = None
+    rm = re.search(r'(\d+)\s*(?:rest|recovery|off)\s*days?', q)
+    if rm:
+        rest_days = int(rm.group(1))
+    else:
+        for w, n in WORD_TO_NUM.items():
+            if re.search(rf'\b{w}\s*(?:rest|recovery|off)\s*days?', q):
+                rest_days = n
+                break
+        if rest_days is None and re.search(r'\b(a|one)\s*(?:rest|recovery|off)\s*day\b', q):
+            rest_days = 1
+    rm_es = re.search(r'(\d+)\s*d[ií]as?\s*de\s*descanso', q)
+    if rest_days is None and rm_es:
+        rest_days = int(rm_es.group(1))
+
+    # Explicit training frequency ("5 days a week", "train 4 days", etc.).
     m = re.search(r'(\d+)\s*[-\s]?\s*(?:day|days|times|x|sessions?)\s*(?:a|per)?\s*week', q)
     if m:
         training_freq = int(m.group(1))
@@ -651,10 +678,15 @@ def extract_intent(query):
             if re.search(rf'\b{w}\b\s*(?:day|days|times|x|sessions?)\s*(?:a|per)\s*week', q):
                 training_freq = n
                 break
-    if training_freq is None and re.search(r'\b(daily|every day)\b', q):
-        training_freq = 7
+
+    # Resolve precedence: explicit freq > rest-days > no-rest > default(all days).
     if training_freq is None:
-        training_freq = num_days if num_days <= 4 else 4
+        if rest_days is not None:
+            training_freq = max(1, num_days - rest_days)
+        elif no_rest:
+            training_freq = num_days
+        else:
+            training_freq = num_days  # DEFAULT: workout every day
     training_freq = max(1, min(training_freq, num_days))
 
     # --- nutrition goal ---
@@ -713,8 +745,14 @@ def extract_intent(query):
 # RETRIEVAL
 # =====================================================================
 def search_elasticsearch(index_name, query_vector, k=3, filter_zero_macros=False):
+    # Fetch more candidates than k for re-ranking/filtering headroom.
+    # ES requires num_candidates >= the knn `k`, so scale both together.
+    # Also set top-level `size` (defaults to 10) so we actually return k docs.
+    knn_k = max(k * 4, k)
+    num_candidates = max(knn_k * 2, 200)
     search_query = {
-        "knn": {"field": "embedding", "query_vector": query_vector, "k": k * 4, "num_candidates": 200},
+        "knn": {"field": "embedding", "query_vector": query_vector, "k": knn_k, "num_candidates": num_candidates},
+        "size": knn_k,
         "_source": True,
     }
     try:
