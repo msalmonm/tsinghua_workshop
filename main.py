@@ -1313,34 +1313,182 @@ def _day_calories(day, catalog):
     return total
 
 
-def _snap_portion(v):
+def _snap_portion(v, lo=PORTION_MIN, hi=PORTION_MAX):
     v = round(v / PORTION_STEP) * PORTION_STEP
-    return round(max(PORTION_MIN, min(PORTION_MAX, v)), 2)
+    return round(max(lo, min(hi, v)), 2)
 
 
-def rebalance_portions(weekly_calendar, catalog, target_calories, iterations=4):
-    """Scale each day's portion multipliers toward the daily calorie target so
-    that all days converge to a similar total. Pushing every day to the same
-    target keeps the highest-vs-lowest spread well under the 15% limit.
-    Multipliers are snapped to realistic 0.25 steps within [0.5, 2.5]."""
+def _is_protein_item(recipe):
+    """True if the recipe gets >=35% of its calories from protein (a lean
+    meat/fish/egg dish). These should stay near 1 serving so protein doesn't
+    blow past target; carb/fat items absorb the remaining calories instead."""
+    cal = recipe.get("base_calories", 0) or 0
+    if cal <= 0:
+        return False
+    return (recipe.get("base_protein_g", 0) * 4) / cal >= 0.35
+
+
+def _carb_pct(recipe):
+    cal = recipe.get("base_calories", 0) or 0
+    if cal <= 0:
+        return 0.0
+    return (recipe.get("base_carbs_g", 0) * 4) / cal
+
+
+def ensure_daily_carbs(weekly_calendar, catalog, min_carb_pct=0.35):
+    """Guarantee every training/meal day has carbohydrate sources. If a day's
+    meals contain no carb-dense recipe, append the best available carb recipes
+    from the catalog to that day's Lunch/Dinner (or any main meal). Without a
+    carb source the rebalancer can only scale protein, which overshoots protein
+    and starves calories. This keeps days realistic and balanced."""
+    if not weekly_calendar or not catalog:
+        return
+    # Index carb-dense recipes in the catalog, richest first.
+    carb_indices = sorted(
+        [i for i, r in enumerate(catalog) if _carb_pct(r) >= min_carb_pct],
+        key=lambda i: _carb_pct(catalog[i]), reverse=True,
+    )
+    if not carb_indices:
+        return
+
+    for day in weekly_calendar:
+        meals = day.get('meals', [])
+        if not meals:
+            continue
+        # Does the day already contain a carb-dense item?
+        has_carb = False
+        used = set()
+        for meal in meals:
+            for idx in meal.get('recipe_indices', []):
+                used.add(idx)
+                if 0 <= idx < len(catalog) and _carb_pct(catalog[idx]) >= min_carb_pct:
+                    has_carb = True
+        if has_carb:
+            continue
+        # Pick carb recipes not already used today.
+        fresh = [i for i in carb_indices if i not in used] or carb_indices
+        # Target main meals (lunch/dinner); fall back to the largest meals.
+        mains = [m for m in meals if any(k in m.get('meal_type', '').lower()
+                                         for k in ('lunch', 'dinner'))]
+        if not mains:
+            mains = meals[:2]
+        ci = 0
+        for meal in mains[:2]:
+            carb_idx = fresh[ci % len(fresh)]
+            ci += 1
+            meal.setdefault('recipe_indices', []).append(carb_idx)
+            meal.setdefault('portion_multipliers', [1.0] * (len(meal['recipe_indices']) - 1))
+            meal['portion_multipliers'].append(1.0)
+
+
+def rebalance_portions(weekly_calendar, catalog, target_calories, target_protein_g=None, iterations=6):
+    """Macro-aware portion rebalancing.
+
+    The old version scaled EVERY item by the same factor to hit calories. With a
+    protein-heavy catalog that pushed protein to ~400 g/day. Now we:
+      - Keep protein-dense items near 1 serving (range 0.5-1.5) so total protein
+        stays close to the target, never multiplied to 2.5 servings.
+      - Scale carb/fat items more freely (0.5-3.0) to fill the remaining
+        calories, so the day reaches its calorie goal with carbs, not protein.
+    Falls back to gentle uniform scaling when a day has no carb/fat items.
+    """
     if not weekly_calendar or target_calories <= 0:
         return
-    for _ in range(iterations):
-        max_rel_err = 0.0
-        for day in weekly_calendar:
-            day_cal = _day_calories(day, catalog)
-            if day_cal <= 0:
-                continue
-            factor = target_calories / day_cal
-            max_rel_err = max(max_rel_err, abs(day_cal - target_calories) / target_calories)
+
+    PRO_MIN, PRO_MAX = 0.5, 1.5      # protein items: ~1 serving
+    OTHER_MIN, OTHER_MAX = 0.5, 3.0  # carb/fat items: absorb remaining calories
+
+    for day in weekly_calendar:
+        # Flatten all (meal, position, recipe) entries for this day.
+        entries = []  # (meal, pos, recipe, is_protein)
+        for meal in day.get('meals', []):
+            ris = meal.get('recipe_indices', [])
+            pms = meal.get('portion_multipliers', [1.0] * len(ris))
+            if len(pms) < len(ris):
+                pms = pms + [1.0] * (len(ris) - len(pms))
+            meal['portion_multipliers'] = pms
+            for pos, idx in enumerate(ris):
+                if 0 <= idx < len(catalog):
+                    entries.append((meal, pos, catalog[idx], _is_protein_item(catalog[idx])))
+        if not entries:
+            continue
+
+        # Step 1: set protein items to 1 serving (snapped within their range).
+        for meal, pos, recipe, is_pro in entries:
+            if is_pro:
+                meal['portion_multipliers'][pos] = _snap_portion(1.0, PRO_MIN, PRO_MAX)
+
+        protein_items = [(m, pos, r) for (m, pos, r, isp) in entries if isp]
+        other_items = [(m, pos, r) for (m, pos, r, isp) in entries if not isp]
+
+        def cur_cal():
+            tot = 0.0
             for meal in day.get('meals', []):
                 ris = meal.get('recipe_indices', [])
-                pms = meal.get('portion_multipliers', [1.0] * len(ris))
-                if len(pms) < len(ris):
-                    pms = pms + [1.0] * (len(ris) - len(pms))
-                meal['portion_multipliers'] = [_snap_portion(pm * factor) for pm in pms]
-        if max_rel_err < 0.05:  # already within 5% of target on every day
-            break
+                pms = meal.get('portion_multipliers', [])
+                for i2, idx in enumerate(ris):
+                    if 0 <= idx < len(catalog) and i2 < len(pms):
+                        tot += catalog[idx]['base_calories'] * pms[i2]
+            return tot
+
+        # Step 2: fill remaining calories using carb/fat items.
+        for _ in range(iterations):
+            day_cal = cur_cal()
+            if abs(day_cal - target_calories) <= target_calories * 0.05:
+                break
+            if other_items:
+                other_cal = sum(r['base_calories'] * m['portion_multipliers'][pos]
+                                for (m, pos, r) in other_items)
+                pro_cal = day_cal - other_cal
+                needed = max(target_calories - pro_cal, 0)
+                if other_cal > 0:
+                    f = needed / other_cal
+                    for (m, pos, r) in other_items:
+                        m['portion_multipliers'][pos] = _snap_portion(
+                            m['portion_multipliers'][pos] * f, OTHER_MIN, OTHER_MAX)
+                else:
+                    break
+            else:
+                # No carb/fat items: gently nudge protein items (bounded) so we
+                # don't wildly overshoot protein just to hit calories.
+                f = target_calories / day_cal if day_cal > 0 else 1.0
+                f = max(0.8, min(f, 1.3))
+                for (m, pos, r) in protein_items:
+                    m['portion_multipliers'][pos] = _snap_portion(
+                        m['portion_multipliers'][pos] * f, PRO_MIN, PRO_MAX)
+                break
+
+        # Step 3: protein ceiling. If total protein still exceeds the target by
+        # >15%, shrink the protein-item portions (down to 0.5) to pull it back.
+        if target_protein_g and protein_items:
+            def cur_protein():
+                tot = 0.0
+                for meal in day.get('meals', []):
+                    ris = meal.get('recipe_indices', [])
+                    pms = meal.get('portion_multipliers', [])
+                    for i2, idx in enumerate(ris):
+                        if 0 <= idx < len(catalog) and i2 < len(pms):
+                            tot += catalog[idx]['base_protein_g'] * pms[i2]
+                return tot
+            ceiling = target_protein_g * 1.15
+            day_pro = cur_protein()
+            if day_pro > ceiling:
+                pf = max(0.5, ceiling / day_pro)
+                for (m, pos, r) in protein_items:
+                    m['portion_multipliers'][pos] = _snap_portion(
+                        m['portion_multipliers'][pos] * pf, 0.5, PRO_MAX)
+                # Re-fill calories with carbs after trimming protein.
+                if other_items:
+                    day_cal = cur_cal()
+                    other_cal = sum(r['base_calories'] * m['portion_multipliers'][pos]
+                                    for (m, pos, r) in other_items)
+                    pro_cal = day_cal - other_cal
+                    needed = max(target_calories - pro_cal, 0)
+                    if other_cal > 0:
+                        f = needed / other_cal
+                        for (m, pos, r) in other_items:
+                            m['portion_multipliers'][pos] = _snap_portion(
+                                m['portion_multipliers'][pos] * f, OTHER_MIN, OTHER_MAX)
 
 
 # =====================================================================
@@ -1672,7 +1820,7 @@ STRICT RULES:
    - Snacks must be light/simple: prefer recipes with "snack_friendly": true (low calories, few ingredients, low prep time). Never assign a heavy full meal as a snack.
    - NEVER repeat the same recipe twice in the SAME day.
    - Unless meal-prep style is YES, do NOT repeat the exact same Breakfast or Dinner across all days; vary them.{macro_rule}{ingredient_rule}
-6. MACRO DISTRIBUTION: a meal may combine 1-3 recipes (e.g., main dish + side, pancakes + eggs, smoothie + toast). Put 2-3 indices in "recipe_indices" with matching "portion_multipliers" when it helps hit the daily targets. Adjust portion_multipliers (0.5, 1.0, 1.5, 2.0) to land near the targets.
+6. MACRO DISTRIBUTION & BALANCE (CRITICAL): a meal may combine 1-3 recipes. Every LUNCH and DINNER MUST pair a protein main with a CARBOHYDRATE source (carbs_pct >= 35, e.g. rice, pasta, potato, oats, quinoa, bread, beans). Do NOT build a day only from lean meats/fish/eggs - that makes protein far too high and calories too low. Aim each day for roughly: protein near the target (NOT triple it), ~45-55% of calories from carbs, the rest from fat. Use portion_multipliers (0.5-2.0) on the CARB/side items to reach the calorie target, and keep protein mains near 1 serving.
 7. CONSISTENCY: keep daily calories and macros similar across days. The difference between the highest and lowest day must stay under 15%.
 8. Include 2-3 snacks per day for balanced nutrition.
 9. DO NOT include daily_totals (Python recalculates them). DO NOT mention calorie or macro numbers in any text field.
@@ -1733,9 +1881,14 @@ RECIPE DATABASE (index 0-{len(catalog_summary)-1}):
     if len(weekly_calendar) > num_days:
         weekly_calendar = weekly_calendar[:num_days]
 
+    # Safety pass: guarantee each day has carb sources so the rebalancer can hit
+    # calories with carbs instead of multiplying lean protein. If a day's meals
+    # contain no carb-dense item, inject carb sides into its main meals.
+    ensure_daily_carbs(weekly_calendar, catalog)
+
     # Deterministically rebalance portions so daily calories/macros converge
     # toward the target (keeps day-to-day spread under the 15% limit).
-    rebalance_portions(weekly_calendar, catalog, target_calories)
+    rebalance_portions(weekly_calendar, catalog, target_calories, target_protein_g)
 
     validation_result = validate_nutrition_plan(
         weekly_calendar, target_calories, target_protein_g, catalog
