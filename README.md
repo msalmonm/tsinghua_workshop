@@ -1,268 +1,254 @@
-# 🏋️ RAG Health & Fitness POC
+# Fitness & Health AI Dashboard
 
-Sistema RAG (Retrieval-Augmented Generation) para generación de planes personalizados de fitness y nutrición usando búsqueda vectorial semántica y OpenAI GPT.
+Fitness dashboard powered by RAG (Retrieval-Augmented Generation) with personalized workout and nutrition plans.
 
-## 🎓 Tsinghua Workshop - LLM and Search
+## 🎓 Project Info
 
-Este proyecto demuestra conceptos avanzados de Information Retrieval y Large Language Models:
-- Vector Search con Elasticsearch
-- Semantic Embeddings con SentenceTransformers
-- Retrieval-Augmented Generation (RAG)
-- Mitigación de alucinaciones en LLMs
+- **University:** Tsinghua University
+- **Course:** Web Information Retrieval
+- **Stack:** Next.js 15 + React 19 + TypeScript + Tailwind CSS
+- **Backend:** Python FastAPI + RAG + Elasticsearch k-NN + OpenAI GPT-4o-mini
+- **Nutrition Science:** BMR/TDEE calculations (Mifflin-St Jeor equation)
 
----
+## ✨ Features
 
-## ✨ Características
-
-✅ **Búsqueda Semántica Vectorial** - Encuentra ejercicios y recetas por significado, no solo keywords
-✅ **Planes Personalizados de 7 Días** - Basados en edad, peso, altura, sexo y nivel de actividad
-✅ **Cálculos Metabólicos Automáticos** - BMR, TDEE, macros optimizados
-✅ **Validación de Seguridad** - Detecta y corrige metas nutricionales peligrosas
-✅ **Multi-fuente de Datos** - GitHub, TheMealDB, FatSecret API
-✅ **Sin Alucinaciones** - Validación post-generación con recálculo de macros
-
----
+- 🎯 **Personalized Fitness Plans** - AI-powered recommendations based on comprehensive user profile
+- 📋 **Activity Level Support** - Tailored plans for sedentary to extra active lifestyles (5 levels)
+- 🍽️ **Weekly Meal Planning** - Smart meal scheduling with portion options (0.5x, 1.0x, 1.5x, 2.0x)
+- 🍿 **Snack Management** - Separate snack options to complement main meals
+- 💪 **Workout Schedules** - Exercise routines with duration and muscle targeting
+- 📊 **Macro Visualization** - Donut charts showing protein/carbs/fats distribution per recipe
+- 📝 **Enumerated Recipes** - Step-by-step ingredients and instructions
+- 🌙 **Dark Mode** - Beautiful glassmorphism UI with dark theme support
+- 📱 **Responsive Design** - Works seamlessly on mobile, tablet, and desktop
 
 ## 🚀 Quick Start
 
-### 1. Instalación
+### Installation
 ```bash
-# Clonar repositorio
-git clone <repo-url>
-cd tsinghua_workshop
-
-# Instalar dependencias
-pip install fastapi uvicorn elasticsearch sentence-transformers openai python-dotenv requests pydantic
+npm install
 ```
 
-### 2. Configuración
-Crear archivo `.env`:
+### Development
 ```bash
-ELASTICSEARCH_URL=https://[tu-instancia].gcp.cloud.es.io:443
-ELASTICSEARCH_API_KEY=[tu-api-key]
-OPENAI_API_KEY=sk-proj-[tu-api-key]
-FATSECRET_CLIENT_ID=[tu-client-id]
-FATSECRET_CLIENT_SECRET=[tu-client-secret]
+npm run dev
 ```
 
-### 3. Indexar Datos
+Open [http://localhost:3000](http://localhost:3000)
+
+### Build
 ```bash
-python crawler.py
-# ⏱️ ~5-10 minutos (descarga y procesa ~1000+ documentos)
+npm run build
 ```
 
-### 4. Iniciar Servidor
+### Production
 ```bash
-uvicorn main:app --reload --port 8000
+npm start
 ```
 
-### 5. Probar API
+## 🔧 Configuration
+
+Create `.env.local` file:
+```
+NEXT_PUBLIC_API_URL=https://tsinghua-workshop.onrender.com
+```
+
+Or for local development:
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## 📊 Dashboard Sections (v3.0)
+
+### 1. Plan Summary Header
+- Plan title and detected goal type
+- User profile: age, sex, weight, height, BMI
+- **NEW in v3:** Activity level, BMR, TDEE, activity factor
+- **NEW in v3:** Goal type, calorie adjustment, safety flags
+
+### 2. Weekly Calendar (7 Days)
+- **Meals:** Grouped by meal_type (Breakfast, Lunch, Dinner, Morning/Afternoon/Evening Snack)
+- **Workouts:** Exercise indices with focus area and duration
+- **Daily Totals:** Recalculated calories, protein, carbs, fats
+- **Notes:** AI-generated daily tips
+
+### 3. Meal Options
+- All available meals from backend (20-25 options)
+- **🆕 Donut Charts:** Visual macro distribution (Protein/Carbs/Fats)
+- **🆕 Enumerated Lists:**
+  - Ingredients (numbered list)
+  - Instructions (numbered steps)
+- **Portion Options:** 4 multipliers with calculated macros
+
+### 4. Snack Options
+- Separate snack library (8-10 options)
+- Same features as meal options (donut charts, enumerated lists)
+- Orange color scheme (vs. purple for meals)
+
+### 5. Workout Options
+- Exercise name, target muscle, equipment
+- MET score
+- Expandable instructions
+
+### 6. AI Recommendations
+- Main tip
+- Personalized notes (activity level + goal)
+- Nutrition tips (macro distribution, meal timing)
+- Workout tips (frequency, recovery)
+- **Safety notes** (from backend validation)
+
+### 7. Retrieval Evidence
+- Recipes retrieved, meal options available, snack options available
+- Exercises used
+- Data source info
+- Validation method (python_recalculated)
+
+## 🎨 UI/UX Features
+
+### 🍩 Donut Charts (Macro Distribution)
+Each recipe card shows a CSS-based donut chart:
+- **Blue segment:** Protein
+- **Green segment:** Carbs
+- **Orange segment:** Fats
+- Percentages calculated from base macros
+
+### 📋 Enumerated Lists
+- **Ingredients:** Ordered list with decimal numbering
+- **Instructions:** Steps split by periods and numbered
+
+### 📱 Responsive Grid
+- **Mobile:** 1 column
+- **Tablet:** 2 columns
+- **Desktop:** 2-3 columns depending on section
+
+## 🔄 How It Works
+
+### User Input Form
+The form collects:
+- **Age** (years)
+- **Sex** (Male/Female dropdown)
+- **Weight** (kg)
+- **Height** (cm)
+- **🆕 Activity Level** (5-option dropdown):
+  - Sedentary (little/no exercise)
+  - Lightly Active (1-3 days/week)
+  - Moderately Active (3-5 days/week)
+  - Very Active (6-7 days/week)
+  - Extra Active (physical job + training)
+- **Fitness Goal** (free text: lose weight, gain muscle, maintain, etc.)
+
+### Backend Processing
+1. **BMR Calculation** - Basal Metabolic Rate using Mifflin-St Jeor equation
+2. **TDEE Calculation** - Total Daily Energy Expenditure (BMR × activity factor)
+3. **Goal Classification** - Detects weight loss (-20%), muscle gain (+15%), recomp (-10%), or maintenance (0%)
+4. **Safety Checks** - Prevents unsafe calorie deficits/surpluses (min 1200/1500 kcal, max ±25% TDEE)
+5. **RAG Retrieval** - Elasticsearch k-NN search for recipes (30 main + 15 snacks) & exercises (12)
+6. **LLM Personalization** - OpenAI GPT-4o-mini generates 7-day plan with portion multipliers
+7. **Python Validation** - Recalculates and validates all macros, ensures targets met
+
+### Frontend Display
+Dashboard dynamically renders 7 sections based on backend response structure.
+
+## 📁 Project Structure
+
+```
+fitness-dashboard/
+├── app/
+│   ├── components/      # Empty (ready for future components)
+│   ├── page.tsx         # 🔥 MAIN DASHBOARD (all functionality)
+│   ├── layout.tsx       # Root layout with metadata
+│   └── globals.css      # Global styles + donut chart CSS
+├── public/              # Static assets
+├── .env.local           # Environment variables (create this)
+├── package.json         # Dependencies
+└── README.md            # This file
+```
+
+## 🧪 Testing
+
+1. **Start backend API:**
 ```bash
-# Health check
-curl http://localhost:8000/health
-
-# Consulta de ejemplo
-curl -X POST http://localhost:8000/api/recommend \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "I want to lose weight and build muscle",
-    "user_profile": {
-      "age": 25,
-      "sex": "male",
-      "weight_kg": 80,
-      "height_cm": 175,
-      "activity_level": "moderately_active"
-    }
-  }'
+python main.py  # or uvicorn main:app --reload
 ```
 
----
-
-## 📁 Estructura del Proyecto
-
-```
-tsinghua_workshop/
-├── main.py                    # Servidor FastAPI (API principal)
-├── crawler.py                 # Sistema de indexación (TRUNCATE & LOAD)
-├── query.py                   # Script CLI para testing
-├── .env                       # Variables de entorno (NO SUBIR A GIT)
-├── .gitignore                # Archivos ignorados
-├── context_dump/             # Materiales del workshop
-│   ├── LLM_AND_SEARCH.pptx
-│   ├── LLM_and_Search_Report_Tsinghua_Expert_Expanded.pdf
-│   ├── LLM_and_Search_Tsinghua.pptx
-│   └── WIR-1.intro-IR(26.2.28).pdf
-└── DOCUMENTACION_PROYECTO.md # Documentación técnica completa
-```
-
----
-
-## 🔧 Componentes Principales
-
-### 1. **main.py** - API FastAPI
-
-**Endpoints**:
-- `GET /health` - Health check del sistema
-- `POST /api/recommend` - Genera plan personalizado
-
-**Funcionalidades**:
-- Cálculo de BMR/TDEE
-- Clasificación automática de objetivos
-- Búsqueda vectorial en Elasticsearch
-- Generación con OpenAI GPT-4o-mini
-- Validación y corrección de macros
-
-### 2. **crawler.py** - Indexación de Datos
-
-**Fuentes de Datos**:
-- 🏋️ GitHub Yuhonas (~800 ejercicios)
-- 🍽️ TheMealDB (~400 recetas)
-- 📊 FatSecret API (~100-300 recetas con macros completos)
-
-**Estrategia**: TRUNCATE & LOAD
-- Borra índices existentes
-- Crea desde cero con mappings actualizados
-- Genera embeddings de 384 dimensiones
-
-### 3. **query.py** - CLI Testing Tool
-
-Permite probar búsquedas sin levantar servidor:
+2. **Start frontend:**
 ```bash
-python query.py "I want to build muscle"
+npm run dev
 ```
 
----
+3. **Fill form with test data:**
+   - Age: 25
+   - Sex: Male
+   - Weight: 75 kg
+   - Height: 175 cm
+   - Activity Level: Moderately Active
+   - Goal: "I want to gain muscle and lose fat"
 
-## 🧠 Arquitectura RAG
+4. **Verify:**
+   - ✅ Plan generates successfully
+   - ✅ Donut charts appear on recipe cards
+   - ✅ Ingredients/instructions are numbered
+   - ✅ Weekly calendar shows meals by type
+   - ✅ Snacks section appears separately
+   - ✅ User profile shows BMR, TDEE, activity level
 
-```
-Usuario → Query
-    ↓
-[SentenceTransformer] → Vector 384D
-    ↓
-[Elasticsearch kNN] → Top-K docs
-    ↓
-[Cálculos Metabólicos] → BMR/TDEE/Macros
-    ↓
-[OpenAI GPT] + Context → Plan Personalizado
-    ↓
-[Validación Python] → Corrección de Macros
-    ↓
-Usuario ← Plan de 7 días (JSON)
-```
+## 🛠️ Available Scripts
 
----
+- `npm run dev` - Start development server (port 3000)
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
 
-## 📚 Documentación Completa
+## 🔧 Git Commands
 
-- **DOCUMENTACION_PROYECTO.md** - Guía técnica completa (arquitectura, funciones, flujos)
-- **DOCUMENTACION_MAIN.md** - Detalle de main.py (en progreso)
-- **context_dump/** - Materiales del Tsinghua Workshop
-
----
-
-## 🛡️ Seguridad Nutricional
-
-El sistema incluye validaciones automáticas:
-- ✅ Mínimos calóricos seguros (1200 F / 1500 M)
-- ✅ Déficit máximo del 25% del TDEE
-- ✅ Superávit máximo del 20% del TDEE
-- ✅ Detección de frases extremas peligrosas
-- ✅ Warnings visibles en respuesta
-
----
-
-## 📊 Ejemplo de Respuesta
-
-```json
-{
-  "plan_summary": {
-    "title": "7-Day Muscle Building & Fat Loss Plan",
-    "goal_detected": "recomposition",
-    "difficulty_level": "Intermediate"
-  },
-  "nutrition_summary": {
-    "avg_daily_calories": 2263,
-    "avg_daily_protein_g": 176,
-    "avg_daily_carbs_g": 234,
-    "avg_daily_fats_g": 69
-  },
-  "weekly_calendar": [
-    {
-      "day": "Monday",
-      "meals": [...],
-      "workout": {...},
-      "daily_totals": {...},
-      "notes": "Focus on compound movements today"
-    }
-  ],
-  "ai_recommendations": {
-    "main_tip": "Prioritize protein timing around workouts",
-    "safety_notes": []
-  }
-}
+Use the included `git-push.bat` script:
+```bash
+git-push.bat
 ```
 
----
+Or manually:
+```bash
+git add .
+git commit -m "your message"
+git push origin main
+```
 
-## 🔍 Tecnologías Utilizadas
+## 📝 Recent Changes (v3.0 - June 2026)
 
-| Categoría | Tecnología | Propósito |
-|-----------|-----------|-----------|
-| Web Framework | FastAPI | API REST moderna y rápida |
-| Database | Elasticsearch Cloud | Búsqueda vectorial kNN |
-| ML Model | all-MiniLM-L6-v2 | Embeddings semánticos (384D) |
-| LLM | OpenAI GPT-4o-mini | Generación de planes |
-| Data Sources | FatSecret, TheMealDB, GitHub | Recetas y ejercicios |
+- ✅ **Removed** Daily Targets section from user profile
+- ✅ **Removed** Macro Overview section with progress bars
+- ✅ **Added** activity_level dropdown to form (5 options)
+- ✅ **Added** donut charts to every recipe card (meals + snacks)
+- ✅ **Added** enumerated ingredients and instructions
+- ✅ **Updated** user profile to show BMR, TDEE, activity_level, goal_type
+- ✅ **Separated** snacks into dedicated section (section 4)
+- ✅ **Updated** weekly calendar to use meal_type structure
+- ✅ **Cleaned** project structure (removed 30+ unnecessary files)
 
----
+## 🎨 Design System
 
-## 🎓 Conceptos del Workshop Aplicados
+- **Glassmorphism** effects with backdrop blur
+- **Gradient backgrounds** for visual hierarchy
+- **Dark mode** fully supported with system preference detection
+- **Color scheme:**
+  - Purple/Indigo for meals
+  - Orange/Red for snacks
+  - Blue for workouts
+  - Amber/Orange for AI tips
+  - Gray/White for base UI
 
-### Information Retrieval
-- ✅ Vector Space Model
-- ✅ Cosine Similarity
-- ✅ kNN Search
+## 🤝 Contributing
 
-### Large Language Models
-- ✅ Retrieval-Augmented Generation (RAG)
-- ✅ Prompt Engineering
-- ✅ Hallucination Mitigation
-- ✅ Structured Output (JSON schema)
+This is a Tsinghua University workshop project. Feel free to fork and modify!
 
----
+## 📄 License
 
-## 🚧 Futuras Mejoras
+MIT
 
-- [ ] Reranking con Cross-Encoders
-- [ ] Hybrid Search (BM25 + Vector)
-- [ ] Fine-tuning de embeddings
-- [ ] Base de datos de usuarios
-- [ ] Ajuste adaptativo semanal
-- [ ] Integración con wearables
+## 🔗 Repository
 
----
+https://github.com/MichelleArceo/Tsinghua_Workshop_Frontend
 
-## 📄 Licencia
+## 👥 Team
 
-MIT License - Proyecto de código abierto
-
----
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea tu feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
----
-
-## 📧 Contacto
-
-Proyecto desarrollado para el **Tsinghua Workshop on LLM and Search**
-
----
-
-**⭐ Si este proyecto te fue útil, considera darle una estrella!**
+Tsinghua University - Web Information Retrieval Course
